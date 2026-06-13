@@ -12,6 +12,13 @@ The documents indexed into the Foundry IQ knowledge base. **Public data only.** 
 
 > NVDA is the hero demo (smallest, most contestable). MSFT + BP are staged locally and added to the KB after the NVDA end-to-end slice works. All public SEC filings; canonical URL + retrieval date recorded above.
 
+## Staged contradicted crack
+
+`NVDA-10-K-2026-02-25.htm` is the **contradicting document** for the sample thesis
+([`../examples/thesis.txt`](../examples/thesis.txt)): the 10-K's export-control / China risk-factor
+language **cuts against** the thesis's load-bearing claim of *continued access to the large China
+market*. Full claim↔contradiction pairing: [`../examples/README.md`](../examples/README.md).
+
 ## Rules
 
 - **Public only** — no confidential, proprietary, licensed-restricted, or personal data.
