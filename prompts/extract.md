@@ -15,7 +15,7 @@ For each claim record:
 - `claim` — one sentence.
 - `horizon` — `short` | `medium` | `long` (infer; default `medium`).
 - `load_bearing` — `true` if the thesis collapses when this claim fails; `false` if it's supporting colour. **Mark the 1–3 claims the whole thesis rests on.** (The CIO uses this to compute robustness — see `docs/scoring.md`.)
-- `lenses` — which of the six lenses can test it (macro, fundamental, technical, risk, event_driven, supply_chain). One or more.
+- `lenses` — which of the six lenses can test it (macro, fundamental, technical, risk, valuation, supply_chain). One or more.
 
 ## Discipline
 
