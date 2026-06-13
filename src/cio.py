@@ -81,6 +81,13 @@ def confidence(cmap: list[dict], data_completeness: float, base: float = 0.7,
     return round(conf, 2)
 
 
+def data_completeness(usable_lenses: int, active_lens_count: int) -> float:
+    """lenses_with_usable_evidence / active_lens_count (docs/scoring.md §3). The denominator is the
+    ACTIVE lens set actually run (3 for the MVP set, 6 for the full set) — never a hardcoded 6, so a
+    3-lens MVP run is not penalised for lenses it never ran."""
+    return round(usable_lenses / max(active_lens_count, 1), 2)
+
+
 def stance_weights(points: list[dict], floor: float = 0.05) -> dict[str, float]:
     """Evidence-proportional stance weights, computed in code (ADR-0009): weight(s) =
     (cited_points(s) + FLOOR) / Σ (cited_points + FLOOR), summing to 1.0. Only points that
