@@ -8,3 +8,5 @@ anthropic==0.109.1               # Claude — the four agents' reasoning
 openai==2.41.1                   # Azure OpenAI — Foundry IQ query planner (gpt-4.1-mini)
 azure-ai-projects==2.2.0         # Foundry project / Agent Service (EPIC-02, Option A)
 pydantic==2.13.4                 # output-schema validation
+
+pytest==9.1.0                    # test runner for tests/ (TESTPLAN-01.3.x onward)
