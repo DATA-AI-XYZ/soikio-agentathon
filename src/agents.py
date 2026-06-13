@@ -5,10 +5,32 @@ reliable and cheap. Bull emits supporting points; Bear/Caution emit typed cracks
 """
 from __future__ import annotations
 import os, json
+from typing import Literal
+from pydantic import BaseModel, ConfigDict, Field
 import llm, foundry_iq, lenses
 
 _P = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SYSTEM = open(os.path.join(_P, "prompts", "system.md"), encoding="utf-8").read()
+
+
+# --- stance-output contract (STORY-02.2.02/03/04 / ADR-0017) ----------------------------
+class StancePoint(BaseModel):
+    """One stance point/crack. The asserted text is `point`; `claim_id` references the claim it
+    concerns. `extra='allow'` keeps any model-added fields. Consumed by cio.build_conflict_map."""
+    model_config = ConfigDict(extra="allow")
+    claim_id: str
+    point: str
+    crack_type: Literal["contradicted", "unsupported", "vulnerable", "support"]
+    citations: list[str] = Field(default_factory=list)
+    lens: str | None = None
+    agent_severity_hint: str | None = None
+    confidence: float = 0.0
+    stance: str
+
+
+def validate_stance(points: list[dict]) -> list[StancePoint]:
+    """Validate a stance's points against the schema (raises on contract violation)."""
+    return [StancePoint.model_validate(p) for p in points]
 
 
 def _prompt(name: str) -> str:
