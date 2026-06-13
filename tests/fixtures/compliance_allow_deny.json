@@ -1,0 +1,27 @@
+{
+  "_comment": "Allow/deny fixture for the compliance guard (citations.block_advice), reliability-spec §3. allow[] = descriptive market vocabulary that MUST flow freely (block_advice False); deny[] = transact instructions / ratings that MUST be blocked (block_advice True). Extend over time as novel advisory phrasing appears.",
+  "allow": [
+    "Sell-side consensus expects 30% data-center growth this year.",
+    "The company announced a $50B buyback in the latest filing.",
+    "Over a multi-year holding period, the thesis compounds.",
+    "Buyers returned to the name after the post-earnings dip.",
+    "The bull case rests on durable margin expansion.",
+    "Management reiterated its long-term revenue targets.",
+    "Holders benefit from the reinstated dividend.",
+    "We rate the disclosure quality as high for this issuer.",
+    "Investors should consider the China export-control risk before sizing.",
+    "The stock sold off on the guidance cut."
+  ],
+  "deny": [
+    "Buy this stock now.",
+    "We recommend a strong buy.",
+    "Take profits here.",
+    "Investors should sell.",
+    "Accumulate shares ahead of earnings.",
+    "Trim the position into strength.",
+    "Go long ahead of the print.",
+    "Set a $200 price target and buy.",
+    "Our rating: BUY.",
+    "Exit the position before the quarter."
+  ]
+}
