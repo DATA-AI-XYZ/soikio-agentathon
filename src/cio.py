@@ -1,0 +1,97 @@
+"""cio.py — adjudicator: deterministic Kintsugi scorer + CIO narrative (EPIC-02 FEAT-02.3).
+
+Agents *classify*; this code *scores*. Severity, robustness and confidence are computed
+from typed facts per docs/scoring.md — not free-text LLM judgement. The narrative + the
+'what would resolve it' lines are the only LLM part, and they cannot change the verdict.
+"""
+from __future__ import annotations
+import os, json
+import llm
+
+_P = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SYSTEM = open(os.path.join(_P, "prompts", "system.md"), encoding="utf-8").read()
+CIO_PROMPT = open(os.path.join(_P, "prompts", "cio.md"), encoding="utf-8").read()
+_ORDER = {"high": 0, "medium": 1, "low": 2}
+
+
+def _severity(crack_type: str, load_bearing: bool, ncites: int) -> str:
+    if crack_type == "contradicted":
+        sev = "high" if load_bearing else "medium"
+        if sev == "high" and ncites < 2:      # single-source cap (docs/scoring.md §1)
+            sev = "medium"
+        return sev
+    if crack_type in ("unsupported", "vulnerable"):
+        return "medium" if load_bearing else "low"
+    return "low"
+
+
+def build_conflict_map(claims: list[dict], cracks: list[dict]) -> list[dict]:
+    lb = {c["id"]: bool(c.get("load_bearing")) for c in claims}
+    merged: dict = {}
+    for c in cracks:
+        ct, cid = c.get("crack_type"), c.get("claim_id")
+        if ct not in ("contradicted", "unsupported", "vulnerable"):
+            continue
+        if ct == "vulnerable" and not c.get("citations"):   # speculation rejected
+            continue
+        m = merged.setdefault((cid, ct), {"claim_id": cid, "crack_type": ct,
+                                          "points": [], "citations": set(), "lenses": set(), "stances": set()})
+        m["points"].append(c.get("point", ""))
+        m["citations"].update(c.get("citations") or [])
+        if c.get("lens"):
+            m["lenses"].add(c["lens"])
+        if c.get("stance"):
+            m["stances"].add(c["stance"])
+    out = []
+    for (cid, ct), m in merged.items():
+        out.append({
+            "claim_id": cid, "crack_type": ct,
+            "severity": _severity(ct, lb.get(cid, False), len(m["citations"])),
+            "point": m["points"][0], "merged_from": m["points"][1:],
+            "citations": sorted(m["citations"]), "lenses": sorted(m["lenses"]),
+            "stances": sorted(m["stances"]), "what_would_resolve_it": "",
+        })
+    out.sort(key=lambda x: (_ORDER[x["severity"]], -len(x["citations"]), x["claim_id"]))
+    return out
+
+
+def robustness(claims: list[dict], cmap: list[dict]) -> str:
+    lb = {c["id"]: bool(c.get("load_bearing")) for c in claims}
+    high_lb = any(c["severity"] == "high" and lb.get(c["claim_id"]) for c in cmap)
+    unsup_lb = any(c["crack_type"] == "unsupported" and lb.get(c["claim_id"]) for c in cmap)
+    med_lb = any(c["severity"] == "medium" and lb.get(c["claim_id"]) for c in cmap)
+    med_all = sum(1 for c in cmap if c["severity"] == "medium")
+    if high_lb or unsup_lb:
+        return "Breaks"
+    if med_lb or med_all >= 2:
+        return "Contested"
+    return "Holds"
+
+
+def confidence(cmap: list[dict], data_completeness: float, base: float = 0.7) -> float:
+    conf = base
+    if data_completeness < 0.5:
+        conf = min(conf, 0.5)
+    if any(c["severity"] == "high" for c in cmap):
+        conf = min(conf, 0.45)
+    return round(conf, 2)
+
+
+def narrate(thesis, extracted, cmap, support, verdict, conf):
+    """LLM writes the brief + concrete 'what would resolve it' per crack. Cannot change the verdict."""
+    user = (
+        f"THESIS:\n{thesis}\n\nVERDICT (computed deterministically — do NOT change it): "
+        f"{verdict} (confidence {conf}).\n\nCONFLICT MAP (ranked cracks):\n{json.dumps(cmap, indent=2)}\n\n"
+        f"BULL SUPPORT:\n{json.dumps(support, indent=2)}\n\n"
+        'Return JSON: {"brief":"3-5 sentences, every figure cited by its Sx id, NO BUY/SELL/HOLD",'
+        '"equity_lean":"Bullish|Caution|Bearish",'
+        '"resolutions":["for crack #1: a specific document/event AND the observation that would flip it","#2 ..."]}'
+    )
+    try:
+        data = llm.json_chat(SYSTEM + "\n\n" + CIO_PROMPT, user, model=llm.CIO_MODEL, max_tokens=2000)
+    except Exception:
+        data = {}
+    res = data.get("resolutions", []) if isinstance(data, dict) else []
+    for i, c in enumerate(cmap):
+        c["what_would_resolve_it"] = res[i] if i < len(res) else "A specific disclosure or event that would settle this crack."
+    return data.get("brief", ""), data.get("equity_lean", "Caution")

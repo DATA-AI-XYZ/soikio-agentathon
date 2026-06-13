@@ -1,0 +1,14 @@
+NVIDIA (NVDA) — long thesis.
+
+NVIDIA is the defining platform of the AI era, and its dominance is durable with years
+of runway ahead. Three things underpin the case:
+
+1. Demand for its data-center AI accelerators structurally exceeds supply, and will keep
+   doing so for the foreseeable future.
+2. It faces no credible competition in AI training — the CUDA software moat locks in
+   developers and customers worldwide.
+3. Its global reach, including continued access to the large China market, supports
+   sustained double-digit data-center revenue growth.
+
+Because the growth runway is long and largely un-disrupted, the premium valuation is
+justified.

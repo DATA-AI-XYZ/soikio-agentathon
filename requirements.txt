@@ -1,7 +1,10 @@
-# Pin exact versions before submission. Names indicative — confirm against the
-# Foundry IQ connect-guide when wiring scripts/setup_foundry_iq.py.
-azure-ai-projects          # Foundry project + Agent Service
-azure-search-documents     # Azure AI Search: knowledge base / agentic retrieval APIs
-azure-identity             # DefaultAzureCredential (managed identity / az login)
-anthropic                  # Claude — the four agents' reasoning (your Anthropic key)
-openai                     # Azure OpenAI — Foundry IQ query p
+# Pinned to the versions verified live against the Hackathon subscription on 2026-06-13
+# (Python 3.14). The knowledge base + agentic retrieval work on azure-search-documents 12.0.0.
+azure-search-documents==12.0.0   # Foundry IQ: knowledge base / source + agentic retrieve (verified)
+azure-identity==1.25.3           # DefaultAzureCredential (managed identity / az login)
+azure-keyvault-secrets==4.11.0   # Anthropic key from Key Vault at runtime (FEAT-06.2)
+azure-storage-blob==12.30.0      # upload public docs to the knowledge source container
+anthropic==0.109.1               # Claude — the four agents' reasoning
+openai==2.41.1                   # Azure OpenAI — Foundry IQ query planner (gpt-4.1-mini)
+azure-ai-projects==2.2.0         # Foundry project / Agent Service (EPIC-02, Option A)
+pydantic==2.13.4                 # output-schema validation
