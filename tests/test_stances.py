@@ -92,3 +92,34 @@ def test_bear_schema(monkeypatch):
     """AC-4 · output validates against the stance schema with stance == 'bear'."""
     pts = _run(monkeypatch, "bear", _BEAR)
     assert all(m.stance == "bear" for m in validate_stance(pts))
+
+
+# --- TESTPLAN-02.2.04 · Caution --------------------------------------------------------
+_CAUTION = {"points": [
+    {"claim_id": "c1", "point": "Base rate: few hardware leaders hold share for a full decade", "crack_type": "vulnerable",
+     "citations": ["S1"], "lens": "risk", "agent_severity_hint": "medium", "confidence": 0.4},
+    {"claim_id": "c1", "point": "Data gap: no supply-chain concentration disclosure in the corpus", "crack_type": "unsupported",
+     "citations": [], "lens": "supply_chain", "agent_severity_hint": "low", "confidence": 0.3},
+]}
+
+
+def test_caution_distinct(monkeypatch):
+    """AC-1 · Caution output is distinct from Bear's cracks (no overlap of asserted points)."""
+    bear = _run(monkeypatch, "bear", _BEAR)
+    caution = _run(monkeypatch, "caution", _CAUTION)
+    bear_points = {p["point"] for p in bear}
+    caution_points = {p["point"] for p in caution}
+    assert caution_points and not (caution_points & bear_points)
+
+
+def test_caution_base_rates(monkeypatch):
+    """AC-2 · surfaces ≥1 base-rate or data-gap concern when the corpus is thin."""
+    pts = _run(monkeypatch, "caution", _CAUTION)
+    text = " ".join(p["point"].lower() for p in pts)
+    assert "base rate" in text or "data gap" in text
+
+
+def test_caution_schema(monkeypatch):
+    """AC-3 · output validates against the stance schema with stance == 'caution'."""
+    pts = _run(monkeypatch, "caution", _CAUTION)
+    assert all(m.stance == "caution" for m in validate_stance(pts))
