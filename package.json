@@ -1,0 +1,31 @@
+{
+  "name": "soikio-agentathon",
+  "version": "1.0.0",
+  "description": "A single reasoning agent that produces fully-cited investment-analysis briefs, grounded in public filings via Microsoft Foundry IQ. Agents League @ AISF 2026 entry.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "pm:lint": "node _00-Project-Management/93-Scripts/validate-frontmatter.js",
+    "pm:dash": "node _00-Project-Management/93-Scripts/generate-dashboard.js",
+    "pm:monitor": "node _00-Project-Management/93-Scripts/generate-monitor.js",
+    "pm:map": "node _00-Project-Management/93-Scripts/generate-codebase-map.js",
+    "pm:doctor": "node _00-Project-Management/93-Scripts/doctor.js",
+    "pm:install": "node _00-Project-Management/93-Scripts/install.js",
+    "pm:update": "node _00-Project-Management/93-Scripts/update.js",
+    "pm:claude-scaffold": "node _00-Project-Management/93-Scripts/claude-scaffold.js",
+    "pm:claude-audit": "node _00-Project-Management/93-Scripts/claude-audit.js",
+    "pm:all": "npm run pm:lint && npm run pm:monitor && npm run pm:dash"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DATA-AI-XYZ/soikio-agentathon.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/DATA-AI-XYZ/soikio-agentathon/issues"
+  },
+  "homepage": "https://github.com/DATA-AI-XYZ/soikio-agentathon#readme"
+}

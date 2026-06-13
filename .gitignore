@@ -1,0 +1,28 @@
+# Secrets & local config
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# Local artefacts / outputs
+/out/
+/tmp/
+*.local.json
+runs/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Internal design / working notes — local reference only, NEVER publish (clean-room)
+docs/design/

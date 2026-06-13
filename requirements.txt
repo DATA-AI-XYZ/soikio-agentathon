@@ -1,0 +1,7 @@
+# Pin exact versions before submission. Names indicative — confirm against the
+# Foundry IQ connect-guide when wiring scripts/setup_foundry_iq.py.
+azure-ai-projects          # Foundry project + Agent Service
+azure-search-documents     # Azure AI Search: knowledge base / agentic retrieval APIs
+azure-identity             # DefaultAzureCredential (managed identity / az login)
+anthropic                  # Claude — the four agents' reasoning (your Anthropic key)
+openai                     # Azure OpenAI — Foundry IQ query p

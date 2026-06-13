@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>soikio-agentathon — sample report (MSFT)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#faf7f2; --card:#ffffff; --ink:#2a2a28; --muted:#6f685c; --line:#e2dccf;
+    --teal:#1f8a8a; --tealbg:#e4f1f1; --tealink:#0f4f4f;
+    --bull:#2e7d4f; --bullbg:#e6f3ec; --bear:#b23b3b; --bearbg:#f6e6e6; --caution:#b8860b; --cautionbg:#f6efdb;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:'Manrope',system-ui,sans-serif;line-height:1.5;}
+  .wrap{max-width:880px;margin:0 auto;padding:24px 20px 60px;}
+  h1,h2,h3,.serif{font-family:'Instrument Serif',Georgia,serif;font-weight:400;}
+  code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .brand{font-family:'Instrument Serif',serif;font-size:20px;}
+  .brand b{color:var(--teal);}
+  .pill{font-size:11px;font-weight:700;letter-spacing:.5px;padding:4px 10px;border-radius:999px;background:#fbe9c9;color:#7a5b06;border:1px solid #e7c889;}
+
+  .banner{background:#fbe9c9;border:1px solid #e7c889;color:#6b4f06;border-radius:10px;padding:10px 14px;font-size:12.5px;margin-bottom:20px;}
+  .banner b{font-weight:700;}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;margin-bottom:18px;}
+
+  .head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;}
+  .ticker{font-size:34px;line-height:1;}
+  .coname{color:var(--muted);font-size:14px;margin-top:4px;}
+  .asof{color:var(--muted);font-size:11px;margin-top:6px;}
+
+  .verdict{display:flex;flex-direction:column;align-items:flex-end;gap:8px;min-width:200px;}
+  .badge{font-size:15px;font-weight:700;padding:8px 16px;border-radius:999px;}
+  .badge.bullish{background:var(--bullbg);color:var(--bull);}
+  .meter{width:200px;}
+  .meter .lbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:3px;}
+  .bar{height:8px;border-radius:999px;background:#eee7da;overflow:hidden;}
+  .bar>span{display:block;height:100%;border-radius:999px;}
+  .bar>span.conf{background:var(--teal);} .bar>span.dc{background:#a9a08c;}
+
+  .thesis{margin-top:18px;font-size:15px;}
+  .thesis .serif{font-size:19px;display:block;margin-bottom:6px;}
+  .weights{margin-top:18px;}
+  .weights .lbl{font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:.4px;text-transform:uppercase;}
+  .wbar{display:flex;height:26px;border-radius:8px;overflow:hidden;border:1px solid var(--line);font-size:11px;font-weight:700;color:#fff;}
+  .wbar>div{display:flex;align-items:center;justify-content:center;}
+  .wbar .wb{background:var(--bull);} .wbar .wr{background:var(--bear);} .wbar .wc{background:var(--caution);}
+
+  /* kintsugi conflict map */
+  .leanchip{font-size:10.5px;color:var(--muted);}
+  .leanchip span{opacity:.6;}
+  .badge.contested{background:#f6efdb;color:#9a6a00;}
+  .thesisline{font-size:12px;color:var(--ink);margin-top:8px;background:#f3f9f9;border-left:3px solid var(--teal);padding:7px 11px;border-radius:0 8px 8px 0;}
+  .crack{border:1px solid var(--line);border-left:4px solid #c9a227;border-radius:0 10px 10px 0;background:#fdfaf0;padding:12px 14px;margin-bottom:10px;}
+  .crack .claim{min-width:55%;}
+  .sev{font-weight:700;font-size:10.5px;padding:2px 8px;border-radius:6px;}
+  .sev.high{background:#f6e6e6;color:#b23b3b;} .sev.medium{background:#f6efdb;color:#9a6a00;} .sev.low{background:#eeeef6;color:#556;}
+  .ctype{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:#9a6a00;background:#fbf3d8;padding:2px 8px;border-radius:6px;}
+  .resolve{font-size:11.5px;color:var(--muted);margin-top:8px;} .resolve b{color:#9a6a00;}
+
+  /* run health */
+  .runmeta{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:12px;color:var(--muted);margin-bottom:14px;}
+  .runmeta b{color:var(--ink);font-weight:600;}
+  table.health{width:100%;border-collapse:collapse;font-size:13px;}
+  table.health th{text-align:left;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);font-weight:700;padding:6px 8px;border-bottom:1px solid var(--line);}
+  table.health td{padding:9px 8px;border-bottom:1px solid var(--line);}
+  table.health tr:last-child td{border-bottom:none;}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:var(--bull);vertical-align:middle;}
+  .dot.warn{background:var(--caution);} .dot.fail{background:var(--bear);}
+  .agcell{font-weight:600;}
+  .mono-sm{font-family:'JetBrains Mono',monospace;font-size:12px;}
+
+  /* view switch */
+  .switch{display:flex;gap:6px;background:#efe9de;border-radius:10px;padding:4px;margin-bottom:16px;width:fit-content;}
+  .switch button{border:none;background:transparent;font-family:inherit;font-weight:600;font-size:13px;color:var(--muted);padding:8px 16px;border-radius:7px;cursor:pointer;}
+  .switch button.active{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .view{display:none;} .view.active{display:block;}
+
+  /* stance tabs */
+  .tabs{display:flex;gap:6px;}
+  .tab{flex:1;text-align:center;padding:10px;border:1px solid var(--line);border-radius:10px 10px 0 0;background:#f4efe6;cursor:pointer;font-weight:600;font-size:13px;color:var(--muted);border-bottom:none;}
+  .tab .n{font-size:11px;font-weight:500;display:block;color:var(--muted);}
+  .tab.active{background:var(--card);color:var(--ink);}
+  .tab.bull.active{box-shadow:0 -2px 0 var(--bull) inset;}
+  .tab.bear.active{box-shadow:0 -2px 0 var(--bear) inset;}
+  .tab.caution.active{box-shadow:0 -2px 0 var(--caution) inset;}
+  .panelwrap{border:1px solid var(--line);border-radius:0 0 12px 12px;padding:6px 0;}
+  .panel{display:none;padding:8px 18px;} .panel.active{display:block;}
+
+  .point{border-bottom:1px solid var(--line);padding:14px 0;}
+  .point:last-child{border-bottom:none;}
+  .ptop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .lens{font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:3px 8px;border-radius:6px;background:var(--tealbg);color:var(--tealink);}
+  .stancechip{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:6px;}
+  .stancechip.bull{background:var(--bullbg);color:var(--bull);} .stancechip.bear{background:var(--bearbg);color:var(--bear);} .stancechip.caution{background:var(--cautionbg);color:var(--caution);}
+  .claim{flex:1;min-width:55%;font-size:14px;}
+  .conf{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+  .cite{margin-top:8px;}
+  .citebtn{font-size:11px;font-weight:600;color:var(--teal);background:var(--tealbg);border:1px solid #bfe0e0;border-radius:6px;padding:3px 9px;cursor:pointer;}
+  .citebtn:hover{background:#d4ebeb;}
+  .citebody{display:none;margin-top:8px;border-left:3px solid var(--teal);padding:8px 12px;background:#f3f9f9;border-radius:0 8px 8px 0;font-size:12.5px;}
+  .citebody.open{display:block;}
+  .citebody .q{font-style:italic;color:#234;} .citebody .src{margin-top:4px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;}
+
+  /* domain (lens) panels */
+  .lenspanel{border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden;}
+  .lhead{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;background:#f6f2ea;}
+  .lhead .lname{font-weight:700;font-size:14px;flex:1;}
+  .lean{font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:6px;}
+  .lean.bull{background:var(--bullbg);color:var(--bull);} .lean.bear{background:var(--bearbg);color:var(--bear);}
+  .lean.mixed{background:#eee;color:#555;} .lean.thin{background:var(--cautionbg);color:var(--caution);}
+  .lcount{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+  .lbody{display:none;padding:6px 16px 14px;}
+  .lbody.open{display:block;}
+  .lfinding{font-size:13.5px;background:#f3f9f9;border-left:3px solid var(--teal);padding:10px 12px;border-radius:0 8px 8px 0;margin:10px 0;}
+  .lfinding b{font-family:'Instrument Serif',serif;font-weight:400;font-size:15px;}
+
+  .conflict{border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden;}
+  .chead{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;background:#f6f2ea;}
+  .chead .t{font-weight:600;font-size:13.5px;}
+  .ctag{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:6px;}
+  .ctag.resolved{background:var(--bullbg);color:var(--bull);} .ctag.open{background:var(--cautionbg);color:var(--caution);}
+  .cbody{display:none;padding:12px 16px;font-size:13px;border-top:1px solid var(--line);}
+  .cbody.open{display:block;}
+  .cbody .row{margin:4px 0;} .who{font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.3px;}
+  .who.b{color:var(--bull);} .who.r{color:var(--bear);} .who.res{color:var(--teal);}
+
+  .srclist{font-size:12.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+  .srclist li{margin:4px 0;}
+  .foot{font-size:11.5px;color:var(--muted);margin-top:8px;} .foot b{color:#7a5b06;}
+  .sectitle{font-size:21px;margin:0 0 12px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">soikio · <b>agentathon</b></div>
+    <div class="pill">MOCKUP · ILLUSTRATIVE</div>
+  </div>
+
+  <div class="banner">
+    <b>Layout mockup.</b> All figures, claims and the verdict below are <b>illustrative placeholders</b> to show the report format — <b>not</b> real analysis of Microsoft. A live run draws every figure from cited public documents via Foundry IQ.
+  </div>
+
+  <!-- HEADER CARD -->
+  <div class="card">
+    <div class="head">
+      <div>
+        <div class="ticker serif">MSFT</div>
+        <div class="coname">Microsoft Corporation · NASDAQ</div>
+        <div class="asof">Generated 12 Jun 2026 · 14:32 UTC · run <span class="mono">sk-20260612-1432-a3f9</span> <em>[sample]</em></div>
+        <div class="thesisline">Thesis under test: <em>“Cloud-led margin expansion makes MSFT durably undervalued.”</em> <span class="mono" style="font-size:10px">[sample]</span></div>
+      </div>
+      <div class="verdict">
+        <div class="badge contested">◑ Thesis: Contested</div>
+        <div class="leanchip">equity lean: Bullish <span>(secondary)</span></div>
+        <div class="meter"><div class="lbl"><span>Confidence</span><span>0.62</span></div><div class="bar"><span class="conf" style="width:62%"></span></div></div>
+        <div class="meter"><div class="lbl"><span>Data completeness</span><span>0.55</span></div><div class="bar"><span class="dc" style="width:55%"></span></div></div>
+      </div>
+    </div>
+    <div class="thesis"><span class="serif">Where the thesis holds &amp; breaks</span>
+      The cloud-margin claim is well-supported but <b>vulnerable</b> to capex; the valuation claim is <b>contradicted</b> by the 5-year multiple; one claim (supply-chain moat) is <b>unsupported</b> in the record. Net: <b>Contested</b> <em>[sample]</em>.
+    </div>
+    <div class="weights"><div class="lbl">Stance weighting</div>
+      <div class="wbar"><div class="wb" style="width:45%">Bull 45%</div><div class="wr" style="width:30%">Bear 30%</div><div class="wc" style="width:25%">Caution 25%</div></div>
+    </div>
+  </div>
+
+  <!-- KINTSUGI CONFLICT MAP (headline output) -->
+  <div class="card">
+    <h2 class="sectitle serif">Kintsugi conflict map — where the thesis cracks</h2>
+    <p class="foot" style="margin-top:-6px;margin-bottom:8px">Disagreement is signal. Cracks ranked by severity; ⚡ = could break the thesis. <em>[sample]</em></p>
+
+    <div class="crack">
+      <div class="ptop"><span class="sev high">⚡ high</span><span class="ctype">vulnerable</span><span class="claim">“Cloud margins keep expanding” — holds now, but capex intensity threatens it <em>[sample]</em>.</span></div>
+      <div class="cite"><button class="citebtn">◷ source</button><div class="citebody"><div class="q">“Capital expenditures rose materially …”</div><div class="src">msft-10k-2025.pdf · Item 7, p.48</div></div></div>
+      <div class="resolve"><b>Would resolve with:</b> next-quarter segment-margin disclosure.</div>
+    </div>
+
+    <div class="crack">
+      <div class="ptop"><span class="sev medium">medium</span><span class="ctype">contradicted</span><span class="claim">“Premium valuation is justified” — the multiple sits above the 5-year mean <em>[sample]</em>.</span></div>
+      <div class="cite"><button class="citebtn">◷ source</button><div class="citebody"><div class="q">“Forward multiple above trailing 5-year mean …”</div><div class="src">peer-valuation.csv · derived</div></div></div>
+      <div class="resolve"><b>Would resolve with:</b> a re-rating or an earnings re-base.</div>
+    </div>
+
+    <div class="crack">
+      <div class="ptop"><span class="sev low">low</span><span class="ctype">unsupported</span><span class="claim">“Supply-chain position is a moat” — no document in the knowledge base addresses it <em>[sample]</em>.</span></div>
+      <div class="resolve"><b>Would resolve with:</b> a competitive/consensus source for the supply-chain lens.</div>
+    </div>
+  </div>
+
+  <!-- AGENT RUN / HEALTH -->
+  <div class="card">
+    <h2 class="sectitle serif">Agent run · health</h2>
+    <div class="runmeta">
+      <span>Run <b class="mono-sm">sk-20260612-1432-a3f9</b></span>
+      <span>Generated <b>12 Jun 2026, 14:32 UTC</b></span>
+      <span>Agents <b>claude-sonnet-4-6</b></span>
+      <span>Planner <b>gpt-4o-mini</b></span>
+      <span>Retrieval effort <b>low</b></span>
+      <span>Total <b>8.4s</b></span>
+      <span>Foundry IQ retrievals <b>14</b></span>
+      <span>Lenses with evidence <b>5 / 6</b></span>
+    </div>
+    <table class="health">
+      <thead><tr><th>Agent</th><th>Status</th><th>Latency</th><th>Retrievals</th><th>Confidence</th></tr></thead>
+      <tbody>
+        <tr><td class="agcell">Bull</td><td><span class="dot"></span>completed</td><td class="mono-sm">2.1s</td><td class="mono-sm">6</td><td class="mono-sm">0.66</td></tr>
+        <tr><td class="agcell">Bear</td><td><span class="dot"></span>completed</td><td class="mono-sm">2.3s</td><td class="mono-sm">5</td><td class="mono-sm">0.58</td></tr>
+        <tr><td class="agcell">Caution</td><td><span class="dot warn"></span>completed · data gap</td><td class="mono-sm">1.8s</td><td class="mono-sm">3</td><td class="mono-sm">0.60</td></tr>
+        <tr><td class="agcell">CIO</td><td><span class="dot"></span>completed</td><td class="mono-sm">2.2s</td><td class="mono-sm">—</td><td class="mono-sm">verdict 0.62</td></tr>
+      </tbody>
+    </table>
+    <p class="foot">Supply-chain lens returned no evidence — flagged by Caution; lowers data completeness. <em>[sample telemetry]</em></p>
+  </div>
+
+  <!-- ANALYSIS CARD with view switch -->
+  <div class="card">
+    <div class="switch">
+      <button class="sw active" data-view="debate">Debate · by stance</button>
+      <button class="sw" data-view="domain">By domain · 6 lenses</button>
+    </div>
+
+    <!-- VIEW: DEBATE -->
+    <div class="view debate active">
+      <div class="tabs">
+        <div class="tab bull active" data-tab="bull">Bull <span class="n">long case · 0.66</span></div>
+        <div class="tab bear" data-tab="bear">Bear <span class="n">negative · 0.58</span></div>
+        <div class="tab caution" data-tab="caution">Caution <span class="n">what breaks it · 0.60</span></div>
+      </div>
+      <div class="panelwrap">
+        <div class="panel bull active">
+          <div class="point"><div class="ptop"><span class="lens">Fundamental</span><span class="claim">Cloud-segment revenue growth stayed in double digits YoY <em>[sample]</em>.</span><span class="conf">0.78</span></div>
+            <div class="cite"><button class="citebtn">◷ source</button><div class="citebody"><div class="q">“Server products and cloud services revenue increased 21% …”</div><div class="src">msft-10k-2025.pdf · Item 7, p.42</div></div></div></div>
+          <div class="point"><div class="ptop"><span class="lens">Macro</span><span class="claim">A projected rate-cut path supports long-duration tech valuations <em>[sample]</em>.</span><span class="conf">0.61</span></div>
+            <div class="cite"><button class="citebtn">◷ source</button><div class="citebody"><div class="q">“Policy rate expected to ease over the next two quarters …”</div><div class="src">macro-release.pdf · p.1</div></div></div></div>
+          <div class="point"><div class="ptop"><span class="lens">Technical</span><span class="claim">Price holding above its long-term trend line <em>[sample]</em>.</span><span class="conf">0.55</span></div>
+            <div class="cite"><button class="citebtn">◷ source</button><div class="citebody"><div class="q">“200-day trend intact through period end …”</div><div class="src">price-history.csv · derived</div></div></div></div>
+        </div>
+        <div class="panel bear">
+          <div class="point"><div class="ptop"><span class="lens">Risk</span><span class="claim">Elevated capex compresses near-term free cash flow <em>[sample]</em>.</span><span class="conf">0.64</span></div>
+            <div class="cite"><button class="citebtn">◷ source</button><div class="citebody"><div class="q">“Capital expenditures rose materially to support AI infrastructure …”</div><div class="src">msft-10k-2025.pdf · Item 7, p.48</div></div></div></div>
+          <div class="point"><div class="ptop"><span class="lens">Fundamental</span><span class="claim">Valuation rich versus its 5-year average <em>[sample]</em>.</span><span class="conf">0.57</span></div>
+            <div class="cite"><button class="citebtn">◷ source</button><div class="citebody"><div class="q">“Forward multiple above trailing 5-year mean …”</div><div class="src">peer-valuation.csv · derived</div></div></div></div>
+          <div class="point"><div class="ptop"><span class="lens">Event-driven</span><span class="claim">Regulatory scrutiny of AI/product bundling is an overhang <em>[sample]</em>.</span><span class="conf">0.49</span></div>
+            <div class="cite"><button class="citebtn">◷ source</button><div class="citebody"><div class="q">“Authorities opened a review into bundling practices …”</div><div class="src">news-feed.json · item 14</div></div></div></div>
+        </div>
+        <div class="panel caution">
+          <div class="point"><div class="ptop"><span class="lens" style="background:var(--cautionbg);color:var(--caution)">Data gap</span><span class="claim">No forward-guidance document in the knowledge base — confidence capped <em>[sample]</em>.</span><span class="conf">n/a</span></div></div>
+          <div class="point"><div class="ptop"><span class="lens" style="background:var(--cautionbg);color:var(--caution)">Base rate</span><span class="claim">Margin-expansion streaks rarely persist beyond a few quarters <em>[sample]</em>.</span><span class="conf">0.52</span></div></div>
+          <div class="point"><div class="ptop"><span class="lens" style="background:var(--cautionbg);color:var(--caution)">Blind spot</span><span class="claim">Neither Bull nor Bear weighed FX exposure <em>[sample]</em>.</span><span class="conf">0.50</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: DOMAIN -->
+    <div class="view domain">
+
+      <div class="lenspanel">
+        <div class="lhead"><span class="lname">Macro</span><span class="lean bull">net bullish</span><span class="lcount">1 source</span></div>
+        <div class="lbody">
+          <div class="lfinding"><b>Finding.</b> Rate-cut path is supportive for valuation; liquidity neutral. FX exposure not assessed <em>[sample]</em>.</div>
+          <div class="point"><div class="ptop"><span class="stancechip bull">Bull</span><span class="claim">Projected easing supports long-duration tech <em>[sample]</em>.</span><span class="conf">0.61</span></div>
+            <div class="cite"><button class="citebtn">◷ source</button><div class="citebody"><div class="q">“Policy rate expected to ease over the next two quarters …”</div><div class="src">macro-release.pdf · p.1</div></div></div></div>
+          <div class="point"><div class="ptop"><span class="stancechip caution">Caution</span><span class="claim">FX exposure unweighted by both stances <em>[sample]</em>.</span><span class="conf">0.50</span></div></div>
+        </div>
+      </div>
+
+      <div class="lenspanel">
+        <div class="lhead"><span class="lname">Fundamental</span><span class="lean mixed">mixed</span><span class="lcount">2 sources</span></div>
+        <div class="lbody">
+          <div class="lfinding"><b>Finding.</b> Strong top-line/cloud momentum offset by a rich valuation versus history <em>[sample]</em>.</div>
+          <div class="point"><div class="ptop"><span class="stancechip bull">Bull</span><span class="claim">Cloud revenue growth in double digits YoY <em>[sample]</em>.</span><span class="conf">0.78</span></div>
+            <div class="cite"><button class="citebtn">◷ source</button><div class="citebody"><div class="q">“Server products and cloud services revenue increased 21% …”</div><div class="src">msft-10k-2025.pdf · Item 7, p.42</div></div></div></div>
+          <div class="point"><div class="ptop"><span class="stancechip bear">Bear</span><span class="claim">Forward multiple above 5-year mean <em>[sample]</em>.</span><span class="conf">0.57</span></div>
+            <div class="cite"><button class="citebtn">◷ source</button><div class="citebody"><div class="q">“Forward multiple above trailing 5-year mean …”</div><div class="src">peer-valuation.csv · derived</div></div></div></div>
+        </div>
+      </div>
+
+      <div class="lenspanel">
+        <div class="lhead"><span class="lname">Technical / Quant</span><span class="lean bull">net bullish</span><span class="lcount">1 source</span></div>
+        <div class="lbody">
+          <div class="lfinding"><b>Finding.</b> Trend constructive; momentum positive but not extended <em>[sample]</em>.</div>
+          <div class="point"><div class="ptop"><span class="stancechip bull">Bull</span><span class="claim">Price above 200-day trend at period end <em>[sample]</em>.</span><span class="conf">0.55</span></div>
+            <div class="cite"><button class="citebtn">◷ source</button><div class="citebody"><div class="q">“200-day trend intact through period end …”</div><div class="src">price-history.csv · derived</div></div></div></div>
+        </div>
+      </div>
+
+      <div class="lenspanel">
+        <div class="lhead"><span class="lname">Risk</span><span class="lean bear">net bearish</span><span class="lcount">1 source</span></div>
+        <div class="lbody">
+          <div class="lfinding"><b>Finding.</b> Capex intensity is the main near-term risk; margin-streak base rates argue for caution <em>[sample]</em>.</div>
+          <div class="point"><div class="ptop"><span class="stancechip bear">Bear</span><span class="claim">Elevated capex compresses near-term FCF <em>[sample]</em>.</span><span class="conf">0.64</span></div>
+            <div class="cite"><button class="citebtn">◷ source</button><div class="citebody"><div class="q">“Capital expenditures rose materially …”</div><div class="src">msft-10k-2025.pdf · Item 7, p.48</div></div></div></div>
+          <div class="point"><div class="ptop"><span class="stancechip caution">Caution</span><span class="claim">Margin-expansion streaks rarely persist beyond a few quarters <em>[sample]</em>.</span><span class="conf">0.52</span></div></div>
+        </div>
+      </div>
+
+      <div class="lenspanel">
+        <div class="lhead"><span class="lname">Event-driven</span><span class="lean bear">net bearish</span><span class="lcount">1 source</span></div>
+        <div class="lbody">
+          <div class="lfinding"><b>Finding.</b> A regulatory review of bundling is a live overhang; no offsetting catalyst found <em>[sample]</em>.</div>
+          <div class="point"><div class="ptop"><span class="stancechip bear">Bear</span><span class="claim">Authorities opened a bundling review <em>[sample]</em>.</span><span class="conf">0.49</span></div>
+            <div class="cite"><button class="citebtn">◷ source</button><div class="citebody"><div class="q">“Authorities opened a review into bundling practices …”</div><div class="src">news-feed.json · item 14</div></div></div></div>
+        </div>
+      </div>
+
+      <div class="lenspanel">
+        <div class="lhead"><span class="lname">Supply-chain</span><span class="lean thin">thin data</span><span class="lcount">0 sources</span></div>
+        <div class="lbody">
+          <div class="lfinding"><b>Finding.</b> No usable evidence in the knowledge base for this lens — excluded from weighting; lowers overall data completeness <em>[sample]</em>.</div>
+          <div class="point"><div class="ptop"><span class="stancechip caution">Caution</span><span class="claim">No consensus/peer document available to assess positioning <em>[sample]</em>.</span><span class="conf">n/a</span></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- (conflict map promoted to the headline section above) -->
+
+  <!-- SOURCES -->
+  <div class="card">
+    <h2 class="sectitle serif">Sources</h2>
+    <ul class="srclist">
+      <li>msft-10k-2025.pdf — annual report <em>[sample reference]</em></li>
+      <li>mac
