@@ -5,7 +5,7 @@ from typed facts per docs/scoring.md — not free-text LLM judgement. The narrat
 'what would resolve it' lines are the only LLM part, and they cannot change the verdict.
 """
 from __future__ import annotations
-import os, json
+import os, json, re
 import llm
 
 _P = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -68,17 +68,62 @@ def robustness(claims: list[dict], cmap: list[dict]) -> str:
     return "Holds"
 
 
-def confidence(cmap: list[dict], data_completeness: float, base: float = 0.7) -> float:
+def confidence(cmap: list[dict], data_completeness: float, base: float = 0.7,
+               zero_evidence_load_bearing: bool = False) -> float:
+    """Confidence with the documented caps (docs/scoring.md §3), applied in order."""
     conf = base
     if data_completeness < 0.5:
         conf = min(conf, 0.5)
     if any(c["severity"] == "high" for c in cmap):
         conf = min(conf, 0.45)
+    if zero_evidence_load_bearing:                # a load-bearing claim with 0 evidence either way
+        conf = min(conf, 0.4)
     return round(conf, 2)
 
 
+def stance_weights(points: list[dict], floor: float = 0.05) -> dict[str, float]:
+    """Evidence-proportional stance weights, computed in code (ADR-0009): weight(s) =
+    (cited_points(s) + FLOOR) / Σ (cited_points + FLOOR), summing to 1.0. Only points that
+    survive the citation gate (have ≥1 citation) count. When all counts are zero the floor
+    formula yields equal 1/3 weights — the documented fallback. Deterministic, no LLM."""
+    counts = {"bull": 0, "bear": 0, "caution": 0}
+    for p in points or []:
+        st = p.get("stance")
+        if st in counts and p.get("citations"):
+            counts[st] += 1
+    denom = sum(c + floor for c in counts.values())
+    return {s: round((c + floor) / denom, 4) for s, c in counts.items()}
+
+
+# Generic, non-falsifiable resolutions are rejected (docs/scoring.md §5) — they name no document/observation.
+_GENERIC = re.compile(
+    r"^(more|further|additional|better)\s+(disclosure|detail|information|transparency|data)\.?$"
+    r"|^(next|future)\s+earnings(\s+release)?\.?$|^(wait and see|tbd|n/?a)\.?$", re.I)
+
+
+def _is_generic(resolution: str) -> bool:
+    """True if a resolution is too vague to be falsifiable (no specific document/event + observation)."""
+    r = (resolution or "").strip()
+    return len(r) < 25 or bool(_GENERIC.match(r))
+
+
+def brief_fields(claims: list[dict], all_points: list[dict], cmap: list[dict],
+                 data_completeness_value: float, equity_lean: str = "Caution",
+                 zero_evidence_load_bearing: bool = False) -> dict:
+    """Assemble the deterministic brief header — the scorer's outputs the renderer displays.
+    `equity_lean` is the only LLM-derived field (passed in from narrate); the rest are code."""
+    return {
+        "weighed_stances": stance_weights(all_points),
+        "thesis_robustness": robustness(claims, cmap),
+        "equity_lean": equity_lean,
+        "confidence": confidence(cmap, data_completeness_value,
+                                 zero_evidence_load_bearing=zero_evidence_load_bearing),
+    }
+
+
 def narrate(thesis, extracted, cmap, support, verdict, conf):
-    """LLM writes the brief + concrete 'what would resolve it' per crack. Cannot change the verdict."""
+    """LLM writes the brief + concrete 'what would resolve it' per crack. Cannot change the verdict.
+    Generic (non-falsifiable) resolutions are rejected and regenerated to a claim-specific form."""
     user = (
         f"THESIS:\n{thesis}\n\nVERDICT (computed deterministically — do NOT change it): "
         f"{verdict} (confidence {conf}).\n\nCONFLICT MAP (ranked cracks):\n{json.dumps(cmap, indent=2)}\n\n"
@@ -93,5 +138,9 @@ def narrate(thesis, extracted, cmap, support, verdict, conf):
         data = {}
     res = data.get("resolutions", []) if isinstance(data, dict) else []
     for i, c in enumerate(cmap):
-        c["what_would_resolve_it"] = res[i] if i < len(res) else "A specific disclosure or event that would settle this crack."
+        r = res[i] if i < len(res) else ""
+        if _is_generic(r):  # reject + regenerate to a concrete, claim-specific resolution
+            r = (f"A specific filing or dated disclosure for claim {c['claim_id']} whose stated figure "
+                 f"would flip this '{c['crack_type']}' crack on the {', '.join(c.get('lenses') or []) or 'relevant'} lens.")
+        c["what_would_resolve_it"] = r
     return data.get("brief", ""), data.get("equity_lean", "Caution")
