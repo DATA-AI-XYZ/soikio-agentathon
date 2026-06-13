@@ -19,6 +19,9 @@ venv/
 *.local.json
 runs/
 
+# Tandem kit runtime (per-session mode tracker — never tracked)
+.tandem-mode.json
+
 # OS / editor
 .DS_Store
 .vscode/
