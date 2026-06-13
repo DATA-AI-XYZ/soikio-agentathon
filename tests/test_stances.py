@@ -49,3 +49,46 @@ def test_bull_schema(monkeypatch):
     pts = _run(monkeypatch, "bull", _BULL)
     models = validate_stance(pts)
     assert models and all(m.stance == "bull" for m in models)
+
+
+# --- TESTPLAN-02.2.03 · Bear -----------------------------------------------------------
+_BEAR = {"points": [
+    {"claim_id": "c1", "point": "Export controls contradict unrestricted China growth", "crack_type": "contradicted",
+     "citations": ["S2"], "lens": "risk", "agent_severity_hint": "high", "confidence": 0.6},
+    {"claim_id": "c1", "point": "No segment-margin disclosure supports the premium", "crack_type": "unsupported",
+     "citations": [], "lens": "fundamental", "agent_severity_hint": "medium", "confidence": 0.4},
+    {"claim_id": "c1", "point": "Premium valuation is vulnerable to a multiple de-rate", "crack_type": "vulnerable",
+     "citations": ["S1"], "lens": "valuation", "agent_severity_hint": "medium", "confidence": 0.5},
+]}
+
+
+def test_bear_crack_types(monkeypatch):
+    """AC-1 · every crack is typed contradicted/unsupported/vulnerable (+support allowed by schema)."""
+    pts = _run(monkeypatch, "bear", _BEAR)
+    allowed = {"contradicted", "unsupported", "vulnerable", "support"}
+    assert pts and all(p["crack_type"] in allowed for p in pts)
+    assert {p["crack_type"] for p in pts} >= {"contradicted", "unsupported", "vulnerable"}
+
+
+def test_bear_citation_rules(monkeypatch):
+    """AC-2 · contradicted/vulnerable carry ≥1 citation; unsupported carries none but names claim+lens."""
+    pts = _run(monkeypatch, "bear", _BEAR)
+    for p in pts:
+        if p["crack_type"] in ("contradicted", "vulnerable"):
+            assert p["citations"], f"{p['crack_type']} must be cited"
+        if p["crack_type"] == "unsupported":
+            assert not p["citations"]
+            assert p["claim_id"] and p["lens"]
+
+
+def test_bear_claim_ref(monkeypatch):
+    """AC-3 · each crack references a claim_id and carries an agent_severity_hint."""
+    pts = _run(monkeypatch, "bear", _BEAR)
+    assert all(p["claim_id"] for p in pts)
+    assert all(p.get("agent_severity_hint") for p in pts)
+
+
+def test_bear_schema(monkeypatch):
+    """AC-4 · output validates against the stance schema with stance == 'bear'."""
+    pts = _run(monkeypatch, "bear", _BEAR)
+    assert all(m.stance == "bear" for m in validate_stance(pts))
