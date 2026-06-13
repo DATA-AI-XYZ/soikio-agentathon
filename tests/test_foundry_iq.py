@@ -39,3 +39,25 @@ def test_query_empty_no_raise():
     r = foundry_iq.query("zzzz qqqq wxyz vvvv")
     assert r["extracts"] == []
     assert r["citations"] == []
+
+
+# --- TESTPLAN-01.3.02 · coverage() probe ------------------------------------------------
+def test_coverage_present():
+    """AC-1 · a claim with a covering fixture doc returns a truthy/covered signal."""
+    assert foundry_iq.coverage("NVIDIA data center revenue growth", "fundamental")
+
+
+def test_coverage_absent():
+    """AC-2 · a claim with no covering doc returns a falsy/not-covered signal.
+
+    Uses a claim of corpus-absent tokens; a real lens name (e.g. 'risk') is deliberately
+    omitted because the probe appends the lens word to the query, and common lens words are
+    themselves covered (the permissive-threshold tradeoff documented in ADR-0015)."""
+    assert not foundry_iq.coverage("zzzz qqqq wxyz vvvv")
+
+
+def test_coverage_boolean():
+    """AC-3 · the signal is a plain bool directly consumable by the coverage gate."""
+    v = foundry_iq.coverage("NVIDIA China export controls", "risk")
+    assert isinstance(v, bool)
+    assert bool(v) == v
