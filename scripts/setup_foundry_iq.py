@@ -12,6 +12,15 @@ Usage:
 from __future__ import annotations
 import os, sys, json
 
+# Windows consoles default to cp1252, which can't encode the status glyphs (→, ✓) below,
+# crashing the script before it reaches Azure. Force UTF-8 so it runs regardless of the
+# host console code page (BUG-20260613-01).
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError):
+        pass
+
 
 def load_env(path: str = ".env") -> None:
     if not os.path.exists(path):
@@ -98,7 +107,7 @@ def probe(query: str):
     from azure.identity import DefaultAzureCredential
     from azure.search.documents.knowledgebases import KnowledgeBaseRetrievalClient
     from azure.search.documents.knowledgebases.models import (
-        KnowledgeBaseRetrievalRequest, KnowledgeRetrievalSemanticIntent, KnowledgeSourceParams,
+        KnowledgeBaseRetrievalRequest, KnowledgeRetrievalSemanticIntent,
     )
     client = KnowledgeBaseRetrievalClient(SEARCH_ENDPOINT, DefaultAzureCredential(), knowledge_base_name=KB_NAME)
     req = KnowledgeBaseRetrievalRequest(
@@ -106,7 +115,21 @@ def probe(query: str):
         include_activity=True,
     )
     resp = client.retrieve(req)
-    print(json.dumps(resp.as_dict() if hasattr(resp, "as_dict") else str(resp), indent=2, default=str)[:4000])
+    d = resp.as_dict() if hasattr(resp, "as_dict") else {}
+    blocks = d.get("response") or []
+    extract = ""
+    if blocks and blocks[0].get("content"):
+        extract = blocks[0]["content"][0].get("text", "") or ""
+    refs = d.get("references") or []
+    # Print a structured summary so BOTH extracts and references always surface,
+    # independent of extract length (BUG-20260613-02).
+    print(f"→ query: {query}")
+    print(f"  extracts: {len(extract)} chars across {len(blocks)} response block(s)")
+    print(f"  references: {len(refs)}")
+    for r in refs[:8]:
+        print(f"    - [{r.get('id')}] {r.get('blobUrl') or r.get('sourceData') or r.get('type')}")
+    print("\n--- extract preview ---")
+    print(extract[:1500])
 
 
 if __name__ == "__main__":
