@@ -1,8 +1,8 @@
 """lenses.py — the six analytical lenses + per-claim retrieval-query builder (EPIC-02 FEAT-02.1)."""
 from __future__ import annotations
 
-LENSES = ["macro", "fundamental", "technical", "risk", "event_driven", "supply_chain"]
-MVP_LENSES = ["fundamental", "risk", "event_driven"]  # contest cut (docs/scoring.md)
+LENSES = ["macro", "fundamental", "technical", "risk", "valuation", "supply_chain"]
+MVP_LENSES = ["fundamental", "risk", "valuation"]  # contest cut, per docs/scoring.md L46 + PRD R3 (ADR-0016)
 
 
 def queries_for(claim: dict, entity_name: str) -> list[tuple[str, str]]:
