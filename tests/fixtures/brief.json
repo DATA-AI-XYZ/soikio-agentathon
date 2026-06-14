@@ -1,0 +1,35 @@
+{
+  "entity": {"name": "NVIDIA", "ticker": "NVDA", "sample": false},
+  "thesis": "NVIDIA data-center revenue compounds and the valuation is justified by AI demand.",
+  "thesis_robustness": "Contested",
+  "confidence": 0.45,
+  "data_completeness": 0.5,
+  "equity_lean": "Caution",
+  "claims": [
+    {"id": "c1", "claim": "Data-center revenue compounds", "load_bearing": true, "horizon": "3y"},
+    {"id": "c2", "claim": "Valuation is justified", "load_bearing": false, "horizon": "1y"}
+  ],
+  "conflict_map": [
+    {"claim_id": "c1", "crack_type": "contradicted", "severity": "medium",
+     "point": "Export controls cut China data-center revenue.", "citations": ["S1"],
+     "lenses": ["risk"], "stances": ["bear"],
+     "what_would_resolve_it": "A 10-Q showing China data-center revenue recovering."},
+    {"claim_id": "c1", "crack_type": "contradicted", "severity": "medium",
+     "point": "Reported gross margin compressed by [figure unverified].", "citations": ["S1"],
+     "lenses": ["risk"], "stances": ["bear"], "figure_flagged": true, "stripped_figures": ["44%"],
+     "what_would_resolve_it": "The 10-K gross-margin line item."},
+    {"claim_id": "c2", "crack_type": "unsupported", "severity": "low",
+     "point": "No retrieved filing supports the valuation multiple.", "citations": [],
+     "lenses": ["valuation"], "stances": ["caution"],
+     "what_would_resolve_it": "A peer-multiple disclosure in a filing."}
+  ],
+  "attack_bias": {"cited_contradicted": 2, "uncited_vulnerable": 1, "contradicted": 2,
+                  "vulnerable": 1, "ratio": 2.0, "low_conviction": false},
+  "active_lenses": ["risk", "valuation", "esg"],
+  "support": [],
+  "brief": "The China crack (S1) contests the data-center thesis; the valuation adds fragility.",
+  "sources": [
+    {"id": "S1", "lens": "risk", "content": "China export controls may reduce NVIDIA data-center revenue in affected quarters."},
+    {"id": "S2", "lens": "valuation", "content": "Forward-multiple discussion appears in the filing."}
+  ]
+}
