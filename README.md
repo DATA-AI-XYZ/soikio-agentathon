@@ -6,7 +6,9 @@
 
 ---
 
-## Why it's different
+## Concept — why it's different
+
+**The concept in one line:** an AI analyst that *refuses to fabricate* — it red-teams an investment thesis against the public record and shows its disagreements as the product, never as advice.
 
 Most analysis agents assert. This one **red-teams a position you already hold** — and refuses to invent numbers:
 
@@ -48,21 +50,30 @@ Full diagram: [`docs/architecture.svg`](docs/architecture.svg). Design rationale
 | Azure OpenAI (small) | Foundry IQ retrieval query planning only |
 | Microsoft Entra ID + managed identity | permission-aware access |
 
-## Quickstart
+## How to run (usage)
 
 See [`docs/runbook.md`](docs/runbook.md) for full provisioning steps. In short:
 
 ```bash
 # 1. configure
 cp .env.example .env        # fill in your Foundry / Search / OpenAI endpoints
-pip install -r requirements.txt
+pip install -r requirements.lock.txt   # fully pinned, shipped pin set (use the lock, not requirements.txt)
 
 # 2. build the knowledge base from public docs
 python scripts/setup_foundry_iq.py
 
 # 3. red-team a thesis
 python scripts/run_example.py --thesis examples/thesis.txt
+
+# offline demo (no Azure/spend): drive everything from the saved run
+FOUNDRY_IQ_BACKEND=mock python scripts/run_example.py --thesis examples/thesis.txt
 ```
+
+> **Reproducible installs:** the dependency set the install path uses is **[`requirements.lock.txt`](requirements.lock.txt)** — every package pinned with `==`. `requirements.txt` is the unpinned source list; ship and install from the lock.
+
+## Reliability gates & eval evidence
+
+The reliability moat lives in [`src/citations.py`](src/citations.py) (see [`docs/reliability-spec.md`](docs/reliability-spec.md)): **compliance** (§3 — no BUY/SELL/HOLD instruction ships), **faithfulness** (§1 — every figure machine-checked against its citation quote; fabricated quote → crack rejected), **coverage** (§2 — uncovered claim → `data_gap`, not a false crack), **attack-bias** (§4 — cited-contradicted vs uncited-vulnerable disclosure). The behavioural eval suite [`scripts/run_evals.py`](scripts/run_evals.py) proves these end-to-end (E1–E9); captured results: **[`evals/EVIDENCE.md`](evals/EVIDENCE.md)** (9/9 green, incl. E2 missing-evidence and E8 determinism).
 
 ## Repository map
 

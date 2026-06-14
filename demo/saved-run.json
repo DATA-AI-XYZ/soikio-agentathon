@@ -1,0 +1,468 @@
+{
+  "entity": {
+    "ticker": "NVDA",
+    "name": "NVIDIA Corporation"
+  },
+  "thesis": "NVIDIA (NVDA) \u2014 long thesis.\n\nNVIDIA is the defining platform of the AI era, and its dominance is durable with years\nof runway ahead. Three things underpin the case:\n\n1. Demand for its data-center AI accelerators structurally exceeds supply, and will keep\n   doing so for the foreseeable future.\n2. It faces no credible competition in AI training \u2014 the CUDA software moat locks in\n   developers and customers worldwide.\n3. Its global reach, including continued access to the large China market, supports\n   sustained double-digit data-center revenue growth.\n\nBecause the growth runway is long and largely un-disrupted, the premium valuation is\njustified.\n",
+  "claims": [
+    {
+      "id": "c1",
+      "claim": "Demand for NVIDIA data-center AI accelerators structurally exceeds supply and will continue to do so for the foreseeable future.",
+      "horizon": "medium",
+      "load_bearing": true,
+      "lenses": [
+        "fundamental",
+        "supply_chain",
+        "macro"
+      ]
+    },
+    {
+      "id": "c2",
+      "claim": "NVIDIA faces no credible competition in AI training due to the CUDA software moat that locks in developers and customers worldwide.",
+      "horizon": "long",
+      "load_bearing": true,
+      "lenses": [
+        "fundamental",
+        "risk"
+      ]
+    },
+    {
+      "id": "c3",
+      "claim": "NVIDIA retains continued access to the large China market, supporting its global revenue base.",
+      "horizon": "medium",
+      "load_bearing": true,
+      "lenses": [
+        "macro",
+        "risk",
+        "event_driven"
+      ]
+    },
+    {
+      "id": "c4",
+      "claim": "NVIDIA's data-center revenue will sustain double-digit growth.",
+      "horizon": "medium",
+      "load_bearing": false,
+      "lenses": [
+        "fundamental"
+      ]
+    },
+    {
+      "id": "c5",
+      "claim": "NVIDIA's premium valuation is justified by the length and undisrupted nature of its growth runway.",
+      "horizon": "medium",
+      "load_bearing": false,
+      "lenses": [
+        "fundamental",
+        "risk"
+      ]
+    }
+  ],
+  "conflict_map": [
+    {
+      "claim_id": "c3",
+      "crack_type": "contradicted",
+      "severity": "high",
+      "point": "NVIDIA's own 10-K states it is 'already effectively foreclosed from the China market by U.S. export controls,' directly contradicting the thesis claim of 'continued access to the large China market.'",
+      "merged_from": [
+        "China revenue declined from $25.0 billion in fiscal 2025 to $19.7 billion in fiscal 2026, an approximately 21% drop, confirming that export controls are already materially eroding the China revenue base the thesis relies upon.",
+        "China revenue fell from $25.0B in FY2025 to $19.7B in FY2026 \u2014 a ~21% year-over-year decline \u2014 while total revenue grew 65%, confirming that China is already a shrinking, not stable, contributor; the thesis's framing of 'continued access' is directly contradicted by the revenue record.",
+        "The 10-K states NVIDIA is 'already effectively foreclosed from the China market by U.S. export controls' and that the Chinese government has issued an Action Plan on accelerator standards that could prevent re-entry even if controls were relaxed \u2014 the thesis's China upside is therefore structurally closed, not merely at risk."
+      ],
+      "citations": [
+        "S10",
+        "S8",
+        "S9"
+      ],
+      "lenses": [
+        "macro",
+        "risk"
+      ],
+      "stances": [
+        "bear",
+        "caution"
+      ],
+      "what_would_resolve_it": "For crack #1 (China access, \u26a1high): a future 10-Q/10-K or official export-control rulemaking showing material China data-center revenue recovery AND removal of the 'effectively foreclosed' language \u2014 combined with evidence that China's published accelerator Action Plan (S10, S11) does not bar NVIDIA products \u2014 would flip the contradiction; absent that, the China-upside pillar stays closed."
+    },
+    {
+      "claim_id": "c1",
+      "crack_type": "vulnerable",
+      "severity": "medium",
+      "point": "NVIDIA itself warns that energy, data-center capacity, and capital shortages are 'crucial' constraints that could materially impact future revenue, directly undermining the thesis that demand-supply imbalance will persist uninterrupted in NVIDIA's favor.",
+      "merged_from": [
+        "NVIDIA's own disclosures acknowledge that non-cancellable purchase obligations have grown substantially and could result in inventory write-downs or impairments if demand is overestimated, signaling that the supply-demand balance could reverse sharply.",
+        "NVIDIA explicitly flags that 'competing technologies and competitor product releases' and 'increase in demand for competitive products' are among the factors that could cause it to overestimate demand, meaning the structural-excess-demand narrative is fragile to competitive disruption.",
+        "NVIDIA itself warns that demand estimation could become 'more pronounced or volatile' and that non-cancellable, non-returnable purchase commitments amplify the downside if demand overshoots \u2014 meaning the supply-constrained narrative carries an embedded inventory-impairment tail risk that the thesis ignores.",
+        "Energy and data-center capacity constraints are explicitly flagged by management as multi-year bottlenecks that could delay or reduce the scale of AI adoption, meaning demand may be throttled not by customer willingness but by physical infrastructure limits outside NVIDIA's control."
+      ],
+      "citations": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ],
+      "lenses": [
+        "fundamental",
+        "macro",
+        "supply_chain"
+      ],
+      "stances": [
+        "bear",
+        "caution"
+      ],
+      "what_would_resolve_it": "For crack #2 (c1 demand-supply durability, medium): forward order-backlog disclosure or supplier-capacity data showing demand sustainably exceeds supply without triggering the non-cancellable purchase-obligation impairment tail NVIDIA flags (S1-S4), plus evidence energy/data-center capacity bottlenecks are not throttling adoption, would resolve the vulnerability."
+    },
+    {
+      "claim_id": "c3",
+      "crack_type": "vulnerable",
+      "severity": "medium",
+      "point": "Even if export controls were relaxed, Chinese regulators have published an Action Plan endorsing new efficiency standards that could effectively bar NVIDIA products from Chinese data centers, creating a second independent barrier to market re-entry.",
+      "merged_from": [
+        "Export controls have already benefited Chinese competitors by steering customers toward alternatives less likely to be restricted, compounding the long-term competitive erosion of NVIDIA's China position.",
+        "Export controls are described as creating compliance burdens, potential supply-chain disruptions, and benefiting competitors offering less-restricted alternatives \u2014 a blind spot for both Bull and Bear is that the export regime may accelerate Chinese domestic alternatives (Huawei Ascend) in ways that permanently reduce the total addressable market NVIDIA can serve."
+      ],
+      "citations": [
+        "S10",
+        "S11"
+      ],
+      "lenses": [
+        "event_driven",
+        "risk"
+      ],
+      "stances": [
+        "bear",
+        "caution"
+      ],
+      "what_would_resolve_it": "For crack #3 (c2 CUDA moat, medium): independent third-party market-share data on AMD MI300X, Google TPU, and AWS Trainium training adoption trajectories versus CUDA (currently absent from corpus, S5) AND closure of the EU/US/UK/China/South Korea antitrust inquiries (S7) without remedies affecting GPU allocation would confirm or break the 'no credible competition' claim."
+    },
+    {
+      "claim_id": "c2",
+      "crack_type": "vulnerable",
+      "severity": "medium",
+      "point": "Regulators in the EU, US, UK, China, and South Korea are all actively requesting information about NVIDIA's GPU sales and competitive practices, and the EU AI Act may restrict NVIDIA's ability to train or deploy AI models in Europe \u2014 posing a direct, externally imposed threat to the CUDA-moat narrative.",
+      "merged_from": [
+        "The thesis claims 'no credible competition,' yet the 10-K explicitly cites ongoing antitrust inquiries in the EU, US, UK, China, and South Korea specifically into GPU markets and NVIDIA's supply-allocation practices \u2014 regulatory intervention is a non-trivial vector that could structurally erode the CUDA moat independent of technical competition."
+      ],
+      "citations": [
+        "S7"
+      ],
+      "lenses": [
+        "risk"
+      ],
+      "stances": [
+        "bear",
+        "caution"
+      ],
+      "what_would_resolve_it": "For crack #4 (c4 forward growth, low/unsupported): forward guidance, analyst consensus, or order-backlog data on the much larger FY2026 base (S13), plus disclosure that the two customers at 22% and 14% of revenue (S2, S4) are not pausing capex, would validate or undermine continued double-digit growth."
+    },
+    {
+      "claim_id": "c2",
+      "crack_type": "unsupported",
+      "severity": "medium",
+      "point": "The evidence establishes NVIDIA's broad platform and CUDA ecosystem but provides no evidence that CUDA is technically uncircumventable \u2014 there is no sourced comparison of CUDA against AMD ROCm, Intel oneAPI, or custom silicon stacks (e.g., Google TPUs, AWS Trainium) that would confirm 'no credible competition' in training.",
+      "merged_from": [
+        "The evidence base contains no direct data on competitor GPU/accelerator market share trajectories (e.g., AMD MI300X, Google TPU, AWS Trainium adoption rates), so the 'no credible competition' claim rests on NVIDIA's own platform narrative rather than independent competitive benchmarking \u2014 this is a material data gap."
+      ],
+      "citations": [
+        "S5"
+      ],
+      "lenses": [
+        "fundamental"
+      ],
+      "stances": [
+        "bear",
+        "caution"
+      ],
+      "what_would_resolve_it": "For crack #5 (c5 valuation, low/unsupported): retrieval of forward earnings multiples, DCF assumptions, or peer comparisons \u2014 none currently in corpus \u2014 would allow the 'premium valuation justified' claim to be tested against the historical ~14.5x return (S15) and management's own sustainability warning (S14)."
+    },
+    {
+      "claim_id": "c4",
+      "crack_type": "vulnerable",
+      "severity": "low",
+      "point": "While data-center revenue grew 68% year-over-year to $193.7 billion in fiscal 2026, the thesis provides no evidence that this rate of growth is sustainable; the evidence flags supply constraints, energy bottlenecks, and customer concentration (one customer = 22% of total revenue) as structural growth limiters.",
+      "merged_from": [
+        "Revenue from Taiwan-headquartered customers (the second-largest geographic segment at $42.3 billion) is estimated to be 76% attributable to US and European end-customers, meaning geographic diversification is substantially lower than headline figures suggest and concentration risk is higher.",
+        "Two customers accounted for 22% and 14% of FY2026 total revenue respectively, creating extreme concentration risk; a capex pause or diversification decision by either hyperscaler could produce a sharp, near-term revenue deceleration that breaks the double-digit growth assumption."
+      ],
+      "citations": [
+        "S13",
+        "S2",
+        "S4",
+        "S9"
+      ],
+      "lenses": [
+        "fundamental"
+      ],
+      "stances": [
+        "bear",
+        "caution"
+      ],
+      "what_would_resolve_it": "A specific disclosure or event that would settle this crack."
+    },
+    {
+      "claim_id": "c5",
+      "crack_type": "vulnerable",
+      "severity": "low",
+      "point": "NVIDIA's own disclosures warn that 'profitability levels may not be sustainable' and that 'failure to meet expectations is likely to cause our stock price to decline,' indicating management itself does not endorse the assumption that the current earnings trajectory (and by extension the valuation premium) is durable.",
+      "merged_from": [
+        "NVIDIA's stock has compounded at ~14.5x over five years versus ~2x for the S&P 500 and Nasdaq 100, meaning the current price already embeds extraordinary growth expectations; both Bull and Bear appear to underweight the base-rate risk that high-multiple platform stocks suffer severe de-ratings when growth merely decelerates rather than reverses.",
+        "Management explicitly warns that operating expense growth may lag revenue growth creating 'volatility or periods where profitability levels may not be sustainable,' and that failure to meet investor expectations 'is likely to cause our stock price to decline' \u2014 the premium valuation embeds a fragility that the thesis treats as durable."
+      ],
+      "citations": [
+        "S14",
+        "S15"
+      ],
+      "lenses": [
+        "risk"
+      ],
+      "stances": [
+        "bear",
+        "caution"
+      ],
+      "what_would_resolve_it": "A specific disclosure or event that would settle this crack."
+    },
+    {
+      "claim_id": "c4",
+      "crack_type": "unsupported",
+      "severity": "low",
+      "point": "The evidence provides historical growth data (Data Center +68% YoY in FY2026) but contains no forward guidance, analyst consensus, or order-backlog data to validate whether double-digit growth is achievable on the much larger FY2026 base \u2014 the forward claim is unsupported by the available corpus.",
+      "merged_from": [],
+      "citations": [
+        "S13"
+      ],
+      "lenses": [
+        "fundamental"
+      ],
+      "stances": [
+        "caution"
+      ],
+      "what_would_resolve_it": "A specific disclosure or event that would settle this crack."
+    },
+    {
+      "claim_id": "c5",
+      "crack_type": "unsupported",
+      "severity": "low",
+      "point": "No valuation multiples, forward earnings estimates, or peer comparisons appear in the retrieved evidence, leaving the claim that 'premium valuation is justified' entirely unsupported by sourced financial analysis.",
+      "merged_from": [
+        "The evidence contains no valuation multiples, DCF assumptions, or peer comparisons \u2014 the claim that 'premium valuation is justified' cannot be assessed from the available corpus, making it a data gap that leaves the most critical investment question (price vs. value) entirely untested."
+      ],
+      "citations": [],
+      "lenses": [
+        "fundamental"
+      ],
+      "stances": [
+        "bear",
+        "caution"
+      ],
+      "what_would_resolve_it": "A specific disclosure or event that would settle this crack."
+    }
+  ],
+  "support": [
+    {
+      "claim_id": "c1",
+      "point": "NVIDIA explicitly describes itself as 'a data center scale AI infrastructure company' and notes that fiscal year 2026 revenue growth was driven by data center compute and networking platforms, with Blackwell architectures representing the majority of Data Center revenue, confirming structural demand leadership.",
+      "crack_type": "support",
+      "citations": [
+        "S1"
+      ],
+      "lens": "fundamental",
+      "agent_severity_hint": "low",
+      "confidence": 0.92,
+      "stance": "bull"
+    },
+    {
+      "claim_id": "c1",
+      "point": "NVIDIA is actively increasing supply and capacity purchases with existing and new suppliers specifically to meet demand projections, and has entered prepaid manufacturing and capacity agreements for both current and future products, indicating management's own conviction that demand structurally exceeds current supply.",
+      "crack_type": "support",
+      "citations": [
+        "S4"
+      ],
+      "lens": "supply_chain",
+      "agent_severity_hint": "low",
+      "confidence": 0.85,
+      "stance": "bull"
+    },
+    {
+      "claim_id": "c2",
+      "point": "NVIDIA's introduction of CUDA in 2006 opened parallel processing to a broad developer community, and the company has since invested over $76.7 billion in R&D, building a unified programmable architecture and a large and growing installed base of developers that strengthens its ecosystem and increases platform value for customers.",
+      "crack_type": "support",
+      "citations": [
+        "S5"
+      ],
+      "lens": "fundamental",
+      "agent_severity_hint": "low",
+      "confidence": 0.9,
+      "stance": "bull"
+    },
+    {
+      "claim_id": "c2",
+      "point": "NVIDIA's platform strategy integrates hardware, systems, software, algorithms, libraries, AI models, and training datasets into a unified offering, creating switching costs across the entire AI stack that go well beyond chip-level competition and deepen developer lock-in.",
+      "crack_type": "support",
+      "citations": [
+        "S5"
+      ],
+      "lens": "fundamental",
+      "agent_severity_hint": "low",
+      "confidence": 0.88,
+      "stance": "bull"
+    },
+    {
+      "claim_id": "c4",
+      "point": "Data Center revenue grew from $47.5 billion in fiscal year 2024 to $115.2 billion in fiscal year 2025 to $193.7 billion in fiscal year 2026 \u2014 a 68% year-over-year increase in FY2026 \u2014 demonstrating sustained and accelerating double-digit (in fact triple-digit) data-center revenue growth.",
+      "crack_type": "support",
+      "citations": [
+        "S13"
+      ],
+      "lens": "fundamental",
+      "agent_severity_hint": "low",
+      "confidence": 0.95,
+      "stance": "bull"
+    },
+    {
+      "claim_id": "c4",
+      "point": "Compute & Networking segment revenue grew 67% year-over-year to $193.5 billion in fiscal year 2026, with Data Center compute up 59% and Data Center networking up 142%, confirming broad-based double-digit data-center revenue growth driven by Blackwell platform demand.",
+      "crack_type": "support",
+      "citations": [
+        "S12"
+      ],
+      "lens": "fundamental",
+      "agent_severity_hint": "low",
+      "confidence": 0.95,
+      "stance": "bull"
+    },
+    {
+      "claim_id": "c5",
+      "point": "A $100 investment in NVIDIA at January 2021 grew to $1,448.75 by January 2026 \u2014 a ~14.5x return \u2014 versus ~2x for the S&P 500 and Nasdaq 100 over the same period, providing historical evidence that NVIDIA's premium valuation has been validated by commensurate earnings and revenue growth.",
+      "crack_type": "support",
+      "citations": [
+        "S15"
+      ],
+      "lens": "fundamental",
+      "agent_severity_hint": "low",
+      "confidence": 0.8,
+      "stance": "bull"
+    },
+    {
+      "claim_id": "c3",
+      "point": "NVIDIA generated $19.7 billion in revenue from China (including Hong Kong) in fiscal year 2026 despite existing export controls, demonstrating that a meaningful China revenue base persists even under restriction, though it declined from $25.0 billion in fiscal year 2025.",
+      "crack_type": "support",
+      "citations": [
+        "S9"
+      ],
+      "lens": "macro",
+      "agent_severity_hint": "medium",
+      "confidence": 0.55,
+      "stance": "bull"
+    }
+  ],
+  "thesis_robustness": "Breaks",
+  "equity_lean": "Caution",
+  "confidence": 0.45,
+  "data_completeness": 1.0,
+  "brief": "The thesis breaks on its third load-bearing claim: NVIDIA's own 10-K states it is 'already effectively foreclosed from the China market by U.S. export controls,' directly contradicting the thesis's premise of 'continued access to the large China market,' with China revenue declining ~21% from $25.0B in FY2025 to $19.7B in FY2026 (S10, S8, S9) even as total revenue grew 65%. The growth and demand-leadership claims are genuinely well-supported \u2014 Data Center revenue rose from $47.5B (FY2024) to $115.2B (FY2025) to $193.7B (FY2026), a 68% YoY increase, with Compute & Networking up 67% to $193.5B and Blackwell driving the majority of Data Center revenue (S13, S12, S1) \u2014 so claims c1 and c4 hold on the historical record. However, the 'no credible competition' claim (c2) rests on NVIDIA's own platform narrative and $76.7B cumulative R&D (S5) with no independent benchmarking against AMD ROCm, TPUs, or Trainium, and is exposed to active antitrust inquiries across the EU, US, UK, China, and South Korea (S7) \u2014 leaving it unsupported and vulnerable rather than confirmed. The valuation-justification claim (c5) is entirely unsupported by sourced multiples or forward estimates \u2014 the cited ~14.5x five-year return versus ~2x for the S&P 500/Nasdaq 100 (S15) is backward-looking and management itself warns 'profitability levels may not be sustainable' (S14). With one high-severity contradiction against a load-bearing China claim and two of four pillars resting on unsupported assertions, the thesis as stated does not survive intact, though its demand and growth foundations remain materially evidenced.",
+  "sources": [
+    {
+      "id": "S1",
+      "lens": "fundamental",
+      "claim_id": "c1",
+      "content": "computing to help solve the most challenging computational problems. Since our original focus on PC graphics, we have expanded to several other large and important computationally intensive fields. Fueled by the sustained demand for exceptional 3D graphics and the scale of the gaming market, NVIDIA has leveraged its GPU architecture to create platforms for scientific computing, AI, data science, autonomous vehicles, robotics, and digital twin applications. NVIDIA is now a data center scale AI infrastructure company reshaping all industries.\nOur two operating segments are \"Compute & Networking\" and \"Graphics.\" Refer to Note 16 of the Notes to the Consolidated Financial Statements in Part IV, Item 15 of this Annual Report on Form 10-K for additional information.\nHeadquartered in Santa Clara, California, NVIDIA was incorporated in California in April 1993 and reincorporated in Delaware in April 1998.\n\nRecent Developments, Future Objectives and Challenges\nRevenue growth in fiscal year 2026 was driven by data center compute and networking platforms for accelerated computing and AI solutions. Our Blackwell architectures represented the majority of our Data Center revenue.\nThe availability of data centers, energy, and capital to support the buildout of NVIDIA AI infrastructure by our customers and partners is crucial, and any shortage of these or other necessary resources could impact our future revenue and financial performance. Expanding energy capacity to meet demand is a complex"
+    },
+    {
+      "id": "S2",
+      "lens": "fundamental",
+      "claim_id": "c1",
+      "content": "parties to build, enhance, and maintain accelerated computing applications that leverage our platforms;\n\u2022the demand for accelerated computing, AI-related cloud services, or large language models;\n\u2022changes that impact the ecosystem for the architectures underlying our products and technologies;\n\u2022government actions or changes in governmental policies, such as export controls, increased restrictions on gaming usage, or tariffs;\n\u2022our customers\u2019 and partners\u2019 ability to secure capital and energy and to build complex datacenter infrastructure timely; and\n\u2022the availability of third-party content on our platforms, such as GeForce NOW.\nThe availability of data centers, energy, and capital to support the buildout of NVIDIA AI infrastructure by our customers and partners is crucial, and any shortage of these and other necessary resources could impact our future revenue and financial performance. Expanding energy capacity to meet demand is a complex, multi-year process involving significant regulatory, technical, and construction challenges. In addition, access to capital can be particularly constrained for less-capitalized companies, which may face difficulties securing financing for large-scale infrastructure projects. These limitations could delay customer and partner deployments or reduce the scale of accelerated computing and AI adoption.\nChallenges in estimating demand could become more pronounced or volatile in the future on both a global and regional basis. Extended lead times ma"
+    },
+    {
+      "id": "S3",
+      "lens": "fundamental",
+      "claim_id": "c1",
+      "content": "for certain of our products as a result of our suppliers\u2019 increase in prices, write down our inventory, incur cancellation penalties, and record impairments, and may have to do so in the future. The impact of these risks would be amplified by our non-cancellable and non-returnable purchase orders placed in advance of our historical lead times and could be exacerbated if we need to make changes to the design of future products. These risks have increased and may continue to increase as our purchase obligations and prepaids have grown and are expected to continue to grow and become a greater portion of our total supply. All of these factors may negatively impact our gross margins and financial results.\nFactors that have caused and/or could in the future cause us to underestimate or overestimate demand, and impact the timing and volume of our revenue, include:\n\u2022changes in product development cycles and time to market;\n\u2022competing technologies and competitor product releases, announcements or other actions;\n\u2022changes in business and economic conditions;\n\u2022sudden or sustained government lockdowns or public health issues;\n\u2022rapidly changing technology or customer requirements;\n\u2022the availability of sufficient data center capacity or energy for customers to procure;\n\u2022new product introductions and transitions resulting in less demand for existing products;\n\u2022new or unexpected end-use cases;\n\u2022increase in demand for competitive products;\n\u2022changes in end-user demand;\n\u2022purchasing decisions mad"
+    },
+    {
+      "id": "S4",
+      "lens": "supply_chain",
+      "claim_id": "c1",
+      "content": "Geopolitical tensions in regions where we rely on suppliers, contract manufacturers, and assembly partners that are critical to our supply continuity, could have a material adverse impact on us. Publicly announced intentions by governments or other companies to purchase our products can further complicate our demand estimates, as such announcements are often non-binding and may not result in committed volumes.\nWe continue to increase our supply and capacity purchases with existing and new suppliers to support our demand projections and increasing complexity of our data center products. We expect supply constraints to be a headwind to Gaming in the first quarter of fiscal year 2027 and beyond. We have also entered and may continue to enter into prepaid manufacturing and capacity agreements to supply both current and future products. The increased purchase volumes and integration of new suppliers and contract manufacturers into our supply chain creates more complexity in managing multiple suppliers with variations in production planning, execution and logistics. Our expanding product portfolio and varying component compatibility and quality may lead to increased inventory levels. We have incurred and may in the future incur inventory provisions or impairments if our inventory or supply or capacity commitments exceed demand for our products or demand declines. \nWe are increasing our U.S.-based manufacturing and investing in specialized equipment and processes to support domestic"
+    },
+    {
+      "id": "S5",
+      "lens": "fundamental",
+      "claim_id": "c2",
+      "content": "world. GPU-powered AI solutions are being developed by thousands of enterprises to deliver services and products that would have been immensely difficult or even impossible with traditional coding. Examples include generative AI, which can create new content such as text, code, images, audio, video, molecule structures, and recommendation systems; and agentic AI where systems of AI models work in concert to automatically complete a task. \nNVIDIA has a platform strategy, bringing together hardware, systems, software, algorithms, libraries, AI models and training data sets, and services to create unique value for the markets we serve. While the computing requirements of these end markets are diverse, we address them with a unified underlying programmable architecture allowing us to support several multi-billion-dollar end markets with the same underlying technology by using a variety of software stacks developed either internally or by third-party developers and partners. The large and growing number of developers and installed base across our platforms strengthens our ecosystem and increases the value of our platform for our customers.\nInnovation is at our core. We have invested over $76.7\u00a0billion in research and development since our inception, yielding inventions that are essential to modern computing. Our invention of the GPU in 1999 sparked the growth of the PC gaming market and redefined computer graphics. With our introduction of CUDA in 2006, we opened the parallel proc"
+    },
+    {
+      "id": "S6",
+      "lens": "fundamental",
+      "claim_id": "c2",
+      "content": "the future contain defects, security vulnerabilities, experience failures, or unsatisfactory performance due to issues in design, fabrication, packaging, materials, bugs and/or use within a system. These risks may also increase when our products are introduced into new devices, markets, technologies and applications, or new versions are released, and when we rely on partners to supply and manufacture components that are used in our products, as these arrangements reduce our direct control over production. AI software products that we or our partners offer rely on training data that may originate from third parties and new training methods, and the resulting products may contain unknown or undetected defects and errors, or reflect unintended bias. Although arrangements with component providers may contain provisions for product defect expense reimbursement, we generally remain responsible to the customer for warranty product defects that may occur from time to time. Some failures in our products or services have been in the past and may in the future be only discovered after a product or service has been shipped or used. \nUndiscovered vulnerabilities in our products or services could result in loss of data or intangible property, or expose our customers to unscrupulous third parties who develop and deploy malicious software programs that could attack our products or services. Defects or failure of our offerings to perform to specifications could lead to substantial damage to t"
+    },
+    {
+      "id": "S7",
+      "lens": "fundamental",
+      "claim_id": "c2",
+      "content": "French Competition Authority collected information from us regarding our business and competition in the graphics card and CSP market as part of an ongoing inquiry into competition in those markets. We have also received, and continue to receive, broad requests for information from competition regulators in the European Union, the United States, the United Kingdom, China, and South Korea regarding our sales of GPUs and other NVIDIA products, our efforts to allocate supply, foundation models and our investments, partnerships and other agreements with companies developing foundation models, the markets in which we compete and our competition, our strategies, roadmaps, and efforts to develop, market, and sell hardware, software, and system solutions, and our agreements with customers, suppliers, and partners. We expect to receive additional requests for information in the future. Such requests have been and are likely to be expensive and burdensome and could negatively impact our business and our relationships with customers, suppliers, and partners.\nGovernments and regulators are also considering, and in certain cases, have imposed restrictions on the hardware, software, and systems used to develop frontier foundation models and generative AI. For example, the EU AI Act became effective on August 1, 2024 and will be fully applicable after a two-year transitional period. The EU AI Act may impact our ability to train, deploy, or release AI models in the EU. Several states are con"
+    },
+    {
+      "id": "S8",
+      "lens": "macro",
+      "claim_id": "c3",
+      "content": "due to an actual or threatened default on government debt could result in higher interest rates, a decline in the value of the U.S. dollar, reduced market liquidity or other adverse conditions. These factors could cause an unrealized or realized loss position in our investments or require us to record impairment charges.\nInternational sales and operations are a significant part of our business, which exposes us to risks that could harm our business.\nWe sell our products internationally, and we also have operations and conduct business internationally. Our semiconductor wafers are manufactured, assembled, tested and packaged by third parties located outside of the United States, and we generated 31% of our revenue in fiscal year 2026 from sales outside the United States. The market in China, where our offerings are limited by export controls, is highly competitive and we expect it to remain competitive going forward. The global nature of our business subjects us to a number of risks and uncertainties, which have had in the past and could in the future have a material adverse effect on our business, financial condition and results of operations. These include domestic and international economic and political conditions in countries in which we and our suppliers and manufacturers do business, government lockdowns to control case spread of global or local health issues, differing legal standards with respect to protection of IP and employment practices, different domestic and int"
+    },
+    {
+      "id": "S9",
+      "lens": "macro",
+      "claim_id": "c3",
+      "content": "by geographic area is based upon the location of the customers\u2019 headquarters. The end customer and shipping location may be different from our customers' headquarters location.\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\t\u00a0\tYear Ended\n\t\u00a0\tJan 25, 2026\t\tJan 26, 2025\t\tJan 28, 2024\n\t\t\t\t\t\t\n\tGeographic Revenue based upon Customer Headquarters Location (1):\n\t(In millions)\n\tUnited States\t$\t149,617\u00a0\t\t\t$\t77,482\u00a0\t\t\t$\t31,533\u00a0\t\n\t\t\t\t\t\t\n\tTaiwan (2)\n\t42,345\u00a0\t\t\t23,600\u00a0\t\t\t14,912\u00a0\t\n\tChina (including Hong Kong)\t19,677\u00a0\t\t\t25,048\u00a0\t\t\t12,330\u00a0\t\n\tOther\n\t4,299\u00a0\t\t\t4,367\u00a0\t\t\t2,147\u00a0\t\n\tTotal revenue\t$\t215,938\u00a0\t\t\t$\t130,497\u00a0\t\t\t$\t60,922\u00a0\t\n\n\n(1)In the third quarter of fiscal year 2026, we changed to revenue based upon the location of our customers\u2019 headquarters as we believe it provides a better representation of the geographic profile of our revenue. Prior period information has been recast to reflect this change. \n(2)In fiscal year 2026, we estimate 76% of Data Center revenue from Taiwan-headquartered customers was attributed to end customers based in the United States and Europe.\nRevenue from sales to customers headquartered outside of the United States accounted for 31%, 41%, and 48% of total revenue for fiscal years\u00a02026, 2025, and 2024, respectively. The increase in revenue to the United States for fiscal years 2026 and 2025 was primarily due to higher U.S.-based Compute & Networking segment demand.\n\nWe refer to customers who purchase products directly from NVIDIA as direct customers, such as AIBs, distributors, ODMs, OEMs, CSPs,"
+    },
+    {
+      "id": "S10",
+      "lens": "risk",
+      "claim_id": "c3",
+      "content": "our China-based competitors and discouraged customers from purchasing, importing, or using our data center products, including any China-specific product designed to comply with U.S. export controls. As another example, an agency of the Chinese government announced an Action Plan that endorses new standards regarding the compute performance per watt and per memory bandwidth of accelerators used in new and renovated data centers in China. Although we are already effectively foreclosed from the China market by U.S. export controls, if those controls changed to allow us to return to the market, the Chinese government could modify or implement the Action Plan in a way that effectively prevents us from being able to design products to meet the new standard, which may restrict the ability of customers to use some of our data center products and may have a material and adverse impact on our business, operating results and financial condition. Further restrictions on our products or the products of our suppliers could negatively impact our business and financial results.\nFinally, our business depends on our ability to receive consistent and reliable supply from our overseas partners, especially in Taiwan and South Korea. Any new restrictions that negatively impact our ability to receive supply of components, parts, or services from Taiwan and South Korea, would negatively impact our business and financial results.\nScrutiny from shareholders, regulators and others regarding our corpor"
+    },
+    {
+      "id": "S11",
+      "lens": "event_driven",
+      "claim_id": "c3",
+      "content": "and may in the future subject downstream users of our products to restrictions on the use, resale, repair, or transfer of our products, negatively impacting our business and financial results. Controls could negatively impact our cost and/or ability to provide services such as NVIDIA AI cloud services and could impact the cost and/or ability for our CSPs and customers to provide services to their end customers, even outside China.\nExport controls have and could in the future disrupt our supply chain and distribution channels, negatively impacting our ability to serve demand, including in markets outside China and for our non-data center products. The possibility of additional export controls has negatively impacted and may in the future negatively impact demand for our products, benefiting competitors that offer alternatives less likely to be restricted by further controls. Repeated changes in the export control rules are likely to impose compliance burdens on our business and our customers, negatively and materially impacting our business.\nIncreasing use of economic sanctions and export controls has impacted and may in the future impact demand for our products or services, negatively impacting our business and financial results. Reduced demand due to export controls has and could in the future lead to excess inventory or cause us to incur related supply charges. Additional unilateral or multilateral controls are also likely to include deemed export control limitations that n"
+    },
+    {
+      "id": "S12",
+      "lens": "fundamental",
+      "claim_id": "c4",
+      "content": "expenses\t10.7\u00a0\t\t\t12.6\u00a0\t\n\tOperating income\t60.4\u00a0\t\t\t62.4\u00a0\t\n\tInterest income\t1.1\u00a0\t\t\t1.4\u00a0\t\n\tInterest expense\t(0.1)\t\t\t(0.2)\t\n\tOther income, net\n\t4.2\u00a0\t\t\t0.8\u00a0\t\n\tTotal other income, net\n\t5.2\u00a0\t\t\t2.0\u00a0\t\n\tIncome before income tax\t65.5\u00a0\t\t\t64.4\u00a0\t\n\tIncome tax expense\t9.9\u00a0\t\t\t8.6\u00a0\t\n\tNet income\t55.6\u00a0\t%\t\t55.8\u00a0\t%\n\n\n\nReportable Segments\nRevenue by Reportable Segments\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\t\tYear Ended\n\t\tJan 25, 2026\t\tJan 26, 2025\t\t$\nChange\t\t%\nChange\n\t\t\t\t\t\t\t\t\n\t\t($ in millions)\n\tCompute & Networking\n\t$\t193,479\u00a0\t\t\t$\t116,193\u00a0\t\t\t$\t77,286\u00a0\t\t\t67\u00a0\t%\n\tGraphics\t22,459\u00a0\t\t\t14,304\u00a0\t\t\t8,155\u00a0\t\t\t57\u00a0\t%\n\tTotal\t$\t215,938\u00a0\t\t\t$\t130,497\u00a0\t\t\t$\t85,441\u00a0\t\t\t65\u00a0\t%\n\n\nOperating Income by Reportable Segments\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\t\tYear Ended\n\t\tJan 25, 2026\t\tJan 26, 2025\t\t$\nChange\t\t%\nChange\n\t\t\t\t\t\t\t\t\n\t\t($ in millions)\n\tCompute & Networking\n\t$\t130,141\u00a0\t\t\t$\t82,875\u00a0\t\t\t$\t47,266\u00a0\t\t\t57\u00a0\t%\n\tGraphics\t9,156\u00a0\t\t\t5,085\u00a0\t\t\t4,071\u00a0\t\t\t80\u00a0\t%\n\tTotal\t$\t139,297\u00a0\t\t\t$\t87,960\u00a0\t\t\t$\t51,337\u00a0\t\t\t58\u00a0\t%\n\n\nCompute & Networking revenue \u2013 The year over year increase was driven by the major platform shifts \u2013 accelerated computing and AI. Revenue from Data Center computing grew 59% driven by demand for our Blackwell computing platform. Revenue from Data Center networking grew 142% driven by the introduction and continued ramp of NVLink compute fabric for GB200 and GB300 systems and the growth of Ethernet and InfiniBand platforms.\nGraphics revenue \u2013 The year over year increase was driven by sales of our Blackwell architecture.\nReportable segment operating in"
+    },
+    {
+      "id": "S13",
+      "lens": "fundamental",
+      "claim_id": "c4",
+      "content": "CSPs, Neocloud builders, AI model makers, enterprises, and public sector entities. Our revenue is concentrated among a limited number of direct and indirect customers and this trend may continue.\nDirect Customers \u2013 For fiscal year 2026, sales to one direct customer represented 22% of total revenue and sales to another direct customer represented 14% of total revenue, all of which were primarily attributable to the Compute & Networking segment.\nFor fiscal year 2025, sales to one direct customer represented 12% of total revenue and sales to two direct customers each represented 11% of total revenue, all of which were primarily attributable to the Compute & Networking segment.\nFor fiscal year 2024, sales to one direct customer represented 13% of total revenue, and were primarily attributable to the Compute & Networking segment.\n78\n\n\n\n\nTable of Contents\nNVIDIA Corporation and Subsidiaries\nNotes to the Consolidated Financial Statements\n(Continued)\n\nThe following table summarizes revenue by specialized markets:\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\t\u00a0\tYear Ended\n\t\u00a0\tJan 25, 2026\t\tJan 26, 2025\t\tJan 28, 2024\n\t\t\t\t\t\t\n\tRevenue by End Market:\n\t(In millions)\n\tData Center\t$\t193,737\u00a0\t\t\t$\t115,186\u00a0\t\t\t$\t47,525\u00a0\t\n\tCompute\t162,361\u00a0\t\t\t102,196\u00a0\t\t\t38,950\u00a0\t\n\tNetworking\t31,376\u00a0\t\t\t12,990\u00a0\t\t\t8,575\u00a0\t\n\tGaming\t16,042\u00a0\t\t\t11,350\u00a0\t\t\t10,447\u00a0\t\n\tProfessional Visualization\t3,191\u00a0\t\t\t1,878\u00a0\t\t\t1,553\u00a0\t\n\tAutomotive\t2,349\u00a0\t\t\t1,694\u00a0\t\t\t1,091\u00a0\t\n\tOEM and Other\t619\u00a0\t\t\t389\u00a0\t\t\t306\u00a0\t\n\tTotal revenue\t$\t215,938\u00a0\t\t\t$\t130,497\u00a0\t\t\t$\t60,922\u00a0\t\n\n\n\nThe fol"
+    },
+    {
+      "id": "S14",
+      "lens": "fundamental",
+      "claim_id": "c5",
+      "content": "credit insurance for customers with extended payment terms, and customer bad debt write-offs;\n\u2022our vendors' payment requirements;\n\u2022unanticipated costs associated with environmental liabilities; and\n\u2022changes in financial accounting standards or interpretations of existing standards.\nAny of these factors could prevent us from achieving our anticipated financial results. For example, we have granted and may continue to grant extended payment terms to some customers, particularly during macroeconomic downturns, which could impact our ability to collect payment. Our vendors have requested and may continue to ask for shorter payment terms, which may impact our cash flow generation. These arrangements reduce the cash we have available for general business operations. In addition, the pace of growth in our operating expenses and investments may lag our revenue growth, creating volatility or periods where profitability levels may not be sustainable. Failure to meet our expectations or the expectations of our investors or security analysts is likely to cause our stock price to decline, as it has in the past, or substantial price volatility.\nRisks Related to Regulatory, Legal, Our Stock and Other Matters\nWe are subject to complex laws, rules, regulations, and political and other actions, including restrictions on the export of our products, which may adversely impact our business.\nWe are subject to laws and regulations domestically and worldwide, affecting our operations in areas includ"
+    },
+    {
+      "id": "S15",
+      "lens": "fundamental",
+      "claim_id": "c5",
+      "content": "Nasdaq 100 Index for the five years ended January\u00a025, 2026. The graph assumes that $100 was invested on January\u00a031, 2021 in our common stock and in each of the S&P 500 Index and the Nasdaq 100 Index. Our common stock is a component of each of the presented indices. Total return assumes reinvestment of dividends in each of the indices indicated. Total return is based on historical results and is not intended to indicate future performance.\n\n*$100 invested on 1/31/2021 in stock and in indices, including reinvestment of dividends. \nSource: FactSet financial data and analytics.\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\t\u00a0\t1/31/2021\t\t1/30/2022\t\t1/29/2023\t\t1/28/2024\t\t1/26/2025\t\t1/25/2026\n\tNVIDIA Corporation\t$\t100.00\u00a0\t\t\t$\t175.98\u00a0\t\t\t$\t157.05\u00a0\t\t\t$\t470.88\u00a0\t\t\t$\t1,100.68\u00a0\t\t\t$\t1,448.75\u00a0\t\n\tS&P 500\t$\t100.00\u00a0\t\t\t$\t121.00\u00a0\t\t\t$\t112.98\u00a0\t\t\t$\t137.98\u00a0\t\t\t$\t174.50\u00a0\t\t\t$\t200.33\u00a0\t\n\tNasdaq 100\t$\t100.00\u00a0\t\t\t$\t112.60\u00a0\t\t\t$\t95.60\u00a0\t\t\t$\t138.07\u00a0\t\t\t$\t173.95\u00a0\t\t\t$\t206.01\u00a0\t\n\n\n\nItem 6. [Reserved]\n35\n\n\n\n\nTable of Contents\n\nItem 7. Management's Discussion and Analysis of Financial Condition and Results of Operations\nThe following discussion and analysis of our financial condition and results of operations should be read in conjunction with \u201cItem 1A. Risk Factors,\u201d our Consolidated Financial Statements and related Notes thereto, as well as other cautionary statements and risks described elsewhere in this Annual Report on Form 10-K, before deciding to purchase, hold, or sell shares of our common stock.\n\nOverview\nOur Company a"
+    },
+    {
+      "id": "S16",
+      "lens": "risk",
+      "claim_id": "c5",
+      "content": "Company, an aerospace company. Mr. Teter holds a B.S. degree in Mechanical Engineering from the University of California at Davis and a J.D. degree from Stanford Law School.\n\nAvailable Information\nOur annual reports on Form 10-K, quarterly reports on Form 10-Q, current reports on Form 8-K and, if applicable, amendments to those reports filed or furnished pursuant to Section 13(a) or 15(d) of the Securities Exchange Act of 1934, as amended, or the Exchange Act, are available free of charge on or through our website, http://www.nvidia.com, as soon as reasonably practicable after we electronically file such material with, or furnish it to, the Securities and Exchange Commission, or the SEC. The SEC\u2019s website,\u00a0http://www.sec.gov,\u00a0contains reports, proxy and information statements, and other information regarding issuers that file electronically with the SEC. Our web site and the information on it or connected to it are not a part of this Annual Report on Form 10-K.\n\nItem 1A. Risk Factors\nThe following risk factors should be considered in addition to the other information in this Annual Report on Form 10-K. The following risks could harm our business, financial condition, results of operations or reputation, which could cause our stock price to decline. Additional risks, trends and uncertainties not presently known to us or that we currently believe are immaterial may also harm our business, financial condition, results of operations or reputation.\nRisk Factors Summary\nRisks Relat"
+    }
+  ],
+  "compliance_ok": true,
+  "telemetry": {
+    "extract_s": 8.5,
+    "retrieve_s": 7.1,
+    "agents_s": 89.1,
+    "cio_s": 17.5,
+    "total_s": 122.2
+  }
+}
