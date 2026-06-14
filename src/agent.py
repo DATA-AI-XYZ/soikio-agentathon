@@ -5,8 +5,8 @@ brief plus an inspectable `run` telemetry block. A single stance failure is isol
 as degraded (never silently dropped) so one slow/broken agent can't stall or void the whole run.
 """
 from __future__ import annotations
-import time, uuid, datetime
-import extract, agents, cio, citations, lenses, llm
+import time, uuid, datetime, copy
+import extract, agents, cio, citations, lenses, llm, memory
 
 
 def _safe_stance(name, thesis, extracted, sources, sids, degraded, extra=""):
@@ -67,7 +67,7 @@ def run(thesis: str) -> dict:
         "degraded": degraded,
     }
 
-    return {
+    brief = {
         "entity": extracted.get("entity"), "thesis": thesis, "claims": extracted["claims"],
         "conflict_map": cmap, "support": support,
         "thesis_robustness": verdict, "equity_lean": lean,
@@ -78,3 +78,12 @@ def run(thesis: str) -> dict:
         "compliance_ok": compliance_ok,
         "run": run_block, "telemetry": tel,
     }
+
+    # Persist every completed run (history / audit trail, STORY-08.2.01). Best-effort:
+    # save a deep copy so the returned brief is never mutated, and a store failure
+    # never breaks /analyze (run id = run_block["id"], so the response links to the store).
+    try:
+        memory.get_store().save_brief(copy.deepcopy(brief))
+    except Exception:
+        pass
+    return brief
