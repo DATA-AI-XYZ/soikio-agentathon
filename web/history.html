@@ -92,6 +92,8 @@
   function bucket(v){ const k=(v||'').toLowerCase(); return k.includes('hold')?'Holds':k.includes('break')?'Breaks':(v?'Contested':null); }
   function fmtDate(s){ if(!s) return '—'; const d=new Date(s); return isNaN(d)? s : d.toLocaleString(undefined,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}); }
   function num(x){ return (typeof x==='number') ? x : (x!=null && !isNaN(parseFloat(x)) ? parseFloat(x) : null); }
+  // Stored runs carry user-submitted thesis/entity text — escape every interpolated field (no stored XSS).
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
   function render(runs){
     runs = Array.isArray(runs) ? runs : [];
@@ -114,11 +116,12 @@
       const v=r.thesis_robustness || r.verdict || '—';
       const id=encodeURIComponent(r.id||'');
       const c=num(r.confidence);
+      // id → encodeURIComponent (URL ctx); class → vpClass whitelist; all text fields → esc().
       return `<tr onclick="location.href='index.html?run=${id}'">`
-        + `<td class="mono">${fmtDate(r.stored_at||r.date)}</td>`
-        + `<td class="tk">${(r.ticker||'—')}</td>`
-        + `<td class="th">${(r.thesis||'')}</td>`
-        + `<td><span class="vp ${vpClass(v)}">${v}</span></td>`
+        + `<td class="mono">${esc(fmtDate(r.stored_at||r.date))}</td>`
+        + `<td class="tk">${esc(r.ticker||'—')}</td>`
+        + `<td class="th">${esc(r.thesis||'')}</td>`
+        + `<td><span class="vp ${vpClass(v)}">${esc(v)}</span></td>`
         + `<td class="conf">${c!=null?c.toFixed(2):'—'}</td>`
         + `<td class="open">open →</td></tr>`;
     }).join('');
