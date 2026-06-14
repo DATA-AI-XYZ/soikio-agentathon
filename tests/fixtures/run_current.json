@@ -1,0 +1,11 @@
+{
+  "entity": {"ticker": "NVDA", "name": "NVIDIA Corporation"},
+  "thesis": "NVIDIA sustains data-center GPU dominance through 2026.",
+  "thesis_robustness": "Contested",
+  "confidence": 0.60,
+  "conflict_map": [
+    {"claim_under_test": "Gross-margin durability", "crack_type": "vulnerable"},
+    {"claim_under_test": "Valuation premium justified", "crack_type": "unsupported"}
+  ],
+  "run": {"id": "r-curr-001"}
+}
