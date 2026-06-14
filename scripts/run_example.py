@@ -7,6 +7,14 @@ _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(_ROOT, "src"))
 import agent, render  # noqa: E402
 
+# LLM-generated crack prose can contain Unicode (→, em dashes, curly quotes); the Windows console
+# defaults to cp1252 and would crash on print. Force UTF-8 stdout/stderr (BUG-20260614-01).
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
+
 
 def main():
     ap = argparse.ArgumentParser(description="Red-team an investment thesis.")
@@ -15,7 +23,15 @@ def main():
     ap.add_argument("--json", help="write the brief JSON here")
     a = ap.parse_args()
 
-    thesis = open(a.thesis, encoding="utf-8").read()
+    try:
+        thesis = open(a.thesis, encoding="utf-8").read().strip()
+    except OSError as e:
+        print(f"error: cannot read thesis file '{a.thesis}': {e}", file=sys.stderr)
+        sys.exit(2)
+    if not thesis:
+        print(f"error: thesis file '{a.thesis}' is empty - provide a bull-thesis paragraph", file=sys.stderr)
+        sys.exit(2)
+
     brief = agent.run(thesis)
 
     print(f"\n=== VERDICT: {brief['thesis_robustness']} "
