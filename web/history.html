@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>SoiKio · History &amp; Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#020202; --s0:#0A0A0A; --s1:#111111; --s2:#1A1A1A; --s3:#222222;
+    --bs:rgba(201,169,97,0.07); --bd:rgba(201,169,97,0.14);
+    --accent:#C9A961; --glow:rgba(201,169,97,0.12);
+    --t1:#E8E4DC; --t2:#A8A29E; --t3:#78716C;
+    --bull:#4ADE80; --bear:#F87171; --caution:#FBBF24; --neutral:#94A3B8;
+    --disp:'Playfair Display',Georgia,serif; --body:'Inter',sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--canvas);color:var(--t1);font-family:var(--body);font-size:15px;line-height:1.6;}
+  .wrap{max-width:980px;margin:0 auto;padding:0 28px 80px;}
+  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);}
+  .mono{font-family:var(--mono);}
+  .topbar{border-bottom:1px solid var(--bd);background:var(--s0);position:sticky;top:0;}
+  .topbar .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;padding-top:0;padding-bottom:0;}
+  .brand{font-family:var(--disp);font-size:22px;} .brand em{color:var(--accent);font-style:italic;}
+  .brand small{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--t3);margin-left:10px;}
+  .nav{display:flex;gap:22px;} .nav a{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--t2);text-decoration:none;cursor:pointer;}
+  .nav a.on,.nav a:hover{color:var(--accent);}
+  .banner{background:linear-gradient(90deg,var(--glow) 0%,var(--s0) 60%);border:1px solid var(--bd);border-left:2px solid var(--accent);padding:10px 16px;margin:18px 0 28px;font-size:12px;color:var(--t2);} .banner b{color:var(--t1);}
+
+  h1{font-family:var(--disp);font-size:34px;font-weight:400;color:var(--t1);margin:8px 0 4px;}
+  .sub{color:var(--t3);font-size:13px;margin-bottom:26px;}
+
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--bs);border:1px solid var(--bs);margin-bottom:32px;}
+  .kpi{background:var(--s0);padding:18px 20px;}
+  .kpi .l{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);margin-bottom:10px;}
+  .kpi .v{font-family:var(--disp);font-size:32px;line-height:1;color:var(--t1);}
+  .kpi .v.gold{color:var(--accent);}
+  .kpi .split{display:flex;gap:10px;margin-top:6px;font-family:var(--mono);font-size:11px;}
+  .kpi .split .h{color:var(--bull);} .kpi .split .c{color:var(--caution);} .kpi .split .b{color:var(--bear);}
+
+  .sect{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin:0 0 14px;}
+  table.runs{width:100%;border-collapse:collapse;font-size:13.5px;}
+  table.runs th{text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);padding:10px 12px;border-bottom:1px solid var(--bd);font-weight:500;}
+  table.runs td{padding:13px 12px;border-bottom:1px solid var(--bs);color:var(--t2);vertical-align:middle;}
+  table.runs tr{cursor:pointer;} table.runs tbody tr:hover td{background:var(--s0);}
+  td.tk{font-family:var(--disp);font-size:17px;color:var(--t1);}
+  td.th{color:var(--t2);max-width:340px;}
+  .vp{display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.04em;padding:3px 10px;border-radius:4px;}
+  .vp.holds{background:rgba(74,222,128,.12);color:var(--bull);border:1px solid rgba(74,222,128,.3);}
+  .vp.contested{background:rgba(251,191,36,.12);color:var(--caution);border:1px solid rgba(251,191,36,.3);}
+  .vp.breaks{background:rgba(248,113,113,.12);color:var(--bear);border:1px solid rgba(248,113,113,.3);}
+  .conf{font-family:var(--mono);font-size:12px;color:var(--t2);}
+  .open{font-family:var(--mono);font-size:11px;color:var(--accent);}
+  .foot{margin-top:40px;padding-top:20px;border-top:1px solid var(--bs);font-family:var(--mono);font-size:11px;color:var(--t3);}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="wrap">
+  <div class="brand">Soi<em>Kio</em><small>Thesis Red-Team</small></div>
+  <div class="nav"><a href="index.html">＋ New analysis</a><a class="on">History</a></div>
+</div></div>
+
+<div class="wrap">
+  <div class="banner"><b>History &amp; dashboard.</b> Live over your stored runs — fetched from <code class="mono">GET /api/runs</code> (→ <code class="mono">memory.list_runs</code>). Empty until you run an analysis.</div>
+
+  <div class="eyebrow">Your analyses</div>
+  <h1>History &amp; dashboard</h1>
+  <div class="sub">Every red-team run is stored and recallable — the audit trail.</div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="l">Total runs</div><div class="v" id="k-total">—</div></div>
+    <div class="kpi"><div class="l">Robustness mix</div><div class="v">&nbsp;</div><div class="split" id="k-mix"></div></div>
+    <div class="kpi"><div class="l">Avg confidence</div><div class="v gold" id="k-conf">—</div></div>
+    <div class="kpi"><div class="l">Avg cracks / run</div><div class="v" id="k-cracks">—</div></div>
+  </div>
+
+  <div class="sect">Recent runs</div>
+  <table class="runs">
+    <thead><tr><th>Date</th><th>Ticker</th><th>Thesis</th><th>Verdict</th><th>Confidence</th><th></th></tr></thead>
+    <tbody id="runs-body">
+      <tr><td colspan="6" style="padding:22px;color:var(--t3)">Loading…</td></tr>
+    </tbody>
+  </table>
+
+  <div class="foot">Rows load from the persisted run store (<code class="mono">/api/runs</code> → Blob / local). Click a row to reopen its cited conflict map. Analysis, not advice — never BUY / SELL / HOLD.</div>
+</div>
+
+<script>
+  // STORY-08.2.02 — populate the dashboard from the live run store (no hard-coded rows).
+  function vpClass(v){ const k=(v||'').toLowerCase(); return k.includes('hold')?'holds':k.includes('break')?'breaks':'contested'; }
+  function bucket(v){ const k=(v||'').toLowerCase(); return k.includes('hold')?'Holds':k.includes('break')?'Breaks':(v?'Contested':null); }
+  function fmtDate(s){ if(!s) return '—'; const d=new Date(s); return isNaN(d)? s : d.toLocaleString(undefined,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}); }
+  function num(x){ return (typeof x==='number') ? x : (x!=null && !isNaN(parseFloat(x)) ? parseFloat(x) : null); }
+
+  function render(runs){
+    runs = Array.isArray(runs) ? runs : [];
+    const mix={Holds:0,Contested:0,Breaks:0};
+    let cSum=0,cN=0, kSum=0,kN=0;
+    runs.forEach(r=>{
+      const b=bucket(r.thesis_robustness || r.verdict); if(b) mix[b]++;
+      const c=num(r.confidence); if(c!=null){ cSum+=c; cN++; }
+      const k=num(r.cracks); if(k!=null){ kSum+=k; kN++; }
+    });
+    document.getElementById('k-total').textContent = runs.length;
+    document.getElementById('k-mix').innerHTML =
+      `<span class="h">${mix.Holds} Holds</span><span class="c">${mix.Contested} Contested</span><span class="b">${mix.Breaks} Breaks</span>`;
+    document.getElementById('k-conf').textContent = cN ? (cSum/cN).toFixed(2) : '—';
+    document.getElementById('k-cracks').textContent = kN ? (kSum/kN).toFixed(1) : '—';
+
+    const tb=document.getElementById('runs-body');
+    if(!runs.length){ tb.innerHTML='<tr><td colspan="6" style="padding:24px;color:var(--t3)">No runs yet — run an analysis to start your history.</td></tr>'; return; }
+    tb.innerHTML = runs.map(r=>{
+      const v=r.thesis_robustness || r.verdict || '—';
+      const id=encodeURIComponent(r.id||'');
+      const c=num(r.confidence);
+      return `<tr onclick="location.href='index.html?run=${id}'">`
+        + `<td class="mono">${fmtDate(r.stored_at||r.date)}</td>`
+        + `<td class="tk">${(r.ticker||'—')}</td>`
+        + `<td class="th">${(r.thesis||'')}</td>`
+        + `<td><span class="vp ${vpClass(v)}">${v}</span></td>`
+        + `<td class="conf">${c!=null?c.toFixed(2):'—'}</td>`
+        + `<td class="open">open →</td></tr>`;
+    }).join('');
+  }
+
+  fetch('/api/runs')
+    .then(r=> r.ok ? r.json() : Promise.reject(r.status))
+    .then(render)
+    .catch(()=> render([]));   // API not reachable (e.g. static preview): honest empty state, never fake data
+</script>
+</body>
+</html>
