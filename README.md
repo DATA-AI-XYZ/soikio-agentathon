@@ -60,11 +60,11 @@ Full diagram: [`docs/architecture.svg`](docs/architecture.svg). Design rationale
 - **History & dashboard** — `web/history.html` (renders illustrative sample data; store-backed listing pending the persistence + API stories).
 - **Reviewer agent** — `src/reviewer.py` (standalone retrospective; not yet integrated after the CIO). Deltas are computed in code, not by the model; predictive calibration stays `tracking` until outcome data exists.
 
-See [`docs/upgrades.md`](docs/upgrades.md).
+See `docs/upgrades.md`.
 
 ## Web frontend
 
-A self-contained demo UI — submit → run → cited conflict map, in the SoiKio brand. Open [`web/index.html`](web/index.html) in a browser (no build, no backend). It renders the [`web/sample-brief.json`](web/sample-brief.json) contract (matches [`docs/output-schema.md`](docs/output-schema.md)); to go live, swap the simulated run for a `/api/redteam` call returning that shape. See [`web/README.md`](web/README.md).
+A self-contained demo UI — submit → run → cited conflict map, in the SoiKio brand. Open `web/index.html` in a browser (no build, no backend). It renders the `web/sample-brief.json` contract (matches [`docs/output-schema.md`](docs/output-schema.md)); to go live, swap the simulated run for a `/api/redteam` call returning that shape. See `web/README.md`.
 
 ## How to run (usage)
 
