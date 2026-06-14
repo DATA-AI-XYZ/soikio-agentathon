@@ -8,10 +8,11 @@ from __future__ import annotations
 
 import os
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-import agent  # bare import — src/ is on sys.path (see Dockerfile --app-dir / PYTHONPATH)
+import agent    # bare import — src/ is on sys.path (see Dockerfile --app-dir / PYTHONPATH)
+import memory   # run-history store (STORY-08.2.03)
 
 app = FastAPI(title="Soikio thesis red-team", version="1.0")
 
@@ -43,3 +44,18 @@ def analyze(req: AnalyzeRequest) -> dict:
     Analysis, not advice — `agent.run` enforces the compliance gate; this layer
     only adapts HTTP <-> the pipeline."""
     return agent.run(req.thesis)
+
+
+@app.get("/api/runs")
+def list_runs(ticker: str | None = None, limit: int = 50) -> list:
+    """History index: recent stored runs (date·ticker·verdict·confidence). Backs web/history.html."""
+    return memory.get_store().list_runs(ticker=ticker, limit=limit)
+
+
+@app.get("/api/runs/{run_id}")
+def get_run(run_id: str) -> dict:
+    """Fetch one stored run's full brief by id; 404 (not 500) when unknown."""
+    run = memory.get_store().get_run(run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="run not found")
+    return run
