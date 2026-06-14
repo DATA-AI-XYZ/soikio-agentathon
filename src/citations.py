@@ -132,3 +132,32 @@ def attack_bias(cracks: list[dict]) -> dict:
         "ratio": round(cited_contradicted / uncited_vulnerable, 2) if uncited_vulnerable else None,
         "low_conviction": n_contradicted == 0 and n_vulnerable > 0,
     }
+
+
+# --- coverage gate (reliability-spec §2) -------------------------------------------------
+def coverage_gate(cracks: list[dict], coverage_fn=None) -> tuple[list[dict], int]:
+    """Tell "the corpus lacks the page" apart from "the claim is baseless" (reliability-spec §2).
+
+    Before an `unsupported` crack is admitted, probe whether the knowledge base covers the claim/lens
+    at all, via the FROZEN `foundry_iq.coverage(claim, lens)` (ADR-0015):
+      - coverage present, no supporting evidence → it stays a legitimate `unsupported` crack;
+      - NO coverage → relabel `crack_type` to `data_gap`. A `data_gap` is off-map by construction —
+        `cio.build_conflict_map` only admits contradicted/unsupported/vulnerable — so it never shows
+        as a flaw in the user's thesis; instead the returned count lowers `data_completeness`.
+
+    Non-`unsupported` cracks pass through untouched. Returns `(cracks, data_gap_count)`.
+    `coverage_fn` defaults to the live/mock `foundry_iq.coverage` (lazy-imported so `citations`
+    stays import-light); tests inject a stub."""
+    if coverage_fn is None:
+        import foundry_iq
+        coverage_fn = foundry_iq.coverage
+    out: list[dict] = []
+    gaps = 0
+    for c in cracks:
+        if c.get("crack_type") == "unsupported":
+            probe = c.get("point") or c.get("claim_id") or ""
+            if not coverage_fn(probe, c.get("lens")):
+                c = {**c, "crack_type": "data_gap"}   # off-map; lowers completeness, not a crack
+                gaps += 1
+        out.append(c)
+    return out, gaps
