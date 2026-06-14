@@ -50,21 +50,26 @@ Full diagram: [`docs/architecture.svg`](docs/architecture.svg). Design rationale
 | Azure OpenAI (small) | Foundry IQ retrieval query planning only |
 | Microsoft Entra ID + managed identity | permission-aware access |
 
-## Roadmap — experimental, not yet wired
+## What's wired · what's next
 
-> **These components are drafted on disk but standalone / experimental.** The shipped pipeline today is `extract → Bull/Bear/Caution → CIO → verdict`; `agent.run` does **not** call any of the items below yet. They are tracked as the next wave (OKR-2026-Q3) and each ships behind its own story + tests before it earns a "live" claim — this README will not describe them as running until then.
+The live reasoning path is `extract → Bull/Bear/Caution → CIO → verdict`. Around it, the product layer (OKR-2026-Q3) lands story-by-story, each behind its own tests. This section tracks exactly what is connected today.
 
-- **Auto-deployed frontend** — `web/` + `.github/workflows/deploy-pages.yml` (drafted; one-time GitHub Pages enablement still pending).
-- **Memory / persistence** — `src/memory.py` (standalone module — append-only local-JSON / Azure Blob store; not yet called by the run path).
-- **Domain agents** — six per-lens specialists (`src/domains.py`, `prompts/domains.md`), experimental; not yet integrated ahead of the debate. Intended lenses follow the canonical taxonomy (ADR-0016).
-- **History & dashboard** — `web/history.html` (renders illustrative sample data; store-backed listing pending the persistence + API stories).
-- **Reviewer agent** — `src/reviewer.py` (standalone retrospective; not yet integrated after the CIO). Deltas are computed in code, not by the model; predictive calibration stays `tracking` until outcome data exists.
+**Wired now (every run is stored and recallable):**
+- **Memory / persistence** — `agent.run` saves each completed run to an append-only store (`src/memory.py`; local-JSON by default, Azure Blob with `MEMORY_BACKEND=blob`).
+- **History API** — `GET /api/runs` + `GET /api/runs/{id}` (`src/server.py`) serve the run history.
+- **History / dashboard** — `web/history.html` lists past runs (date·ticker·verdict·confidence) + KPIs straight from `/api/runs`.
+- **Reviewer & Domains report tabs** — `web/index.html` renders the `review` block (cracks healed / persisting vs your run history, calibration `tracking`) and the six-lens `domain_findings` (ADR-0016 taxonomy; a no-coverage lens shows as a *data gap*, never an invented crack).
+
+**Next (built + tested, pipeline integration in progress — not on the `/analyze` path yet):**
+- **Domain specialists** — `src/domains.py` (six lenses, ADR-0016) reconciled and tested; running them ahead of the debate + an E1–E9 eval refresh is in progress.
+- **Reviewer agent** — `src/reviewer.py` (code-computed deltas, `calibration.status=tracking`) built and tested; invoking it after the CIO on a run is the remaining step.
+- **Auto-deployed frontend** — `.github/workflows/deploy-pages.yml` publishes `web/` to GitHub Pages on push to `main` (one-time Settings → Pages → GitHub Actions toggle pending).
 
 See `docs/upgrades.md`.
 
 ## Web frontend
 
-A self-contained demo UI — submit → run → cited conflict map, in the SoiKio brand. Open `web/index.html` in a browser (no build, no backend). It renders the `web/sample-brief.json` contract (matches [`docs/output-schema.md`](docs/output-schema.md)); to go live, swap the simulated run for a `/api/redteam` call returning that shape. See `web/README.md`.
+A self-contained demo UI — submit → run → cited conflict map, in the SoiKio brand. Open `web/index.html` in a browser (no build, no backend). It renders the `web/sample-brief.json` contract (matches [`docs/output-schema.md`](docs/output-schema.md)); wiring its submit form to the live `POST /analyze` backend is the remaining step. The companion `web/history.html` is already live against `GET /api/runs`. See `web/README.md`.
 
 ## How to run (usage)
 
