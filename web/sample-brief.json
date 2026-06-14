@@ -1,0 +1,66 @@
+{
+  "thesis": {
+    "entity": { "ticker": "MSFT", "name": "Microsoft Corporation" },
+    "text": "Cloud-led margin expansion makes MSFT durably undervalued; the premium multiple is justified and its supply-chain position is a moat.",
+    "claims": [
+      { "id": "c1", "claim": "Cloud margins keep expanding", "horizon": "medium", "load_bearing": true,  "lenses": ["fundamental"] },
+      { "id": "c2", "claim": "Premium valuation is justified", "horizon": "medium", "load_bearing": true,  "lenses": ["fundamental"] },
+      { "id": "c3", "claim": "Supply-chain position is a moat", "horizon": "long", "load_bearing": false, "lenses": ["supply_chain"] }
+    ]
+  },
+  "thesis_robustness": "Contested",
+  "equity_lean": "Bullish",
+  "confidence": 0.62,
+  "data_completeness": 0.55,
+  "thesis_summary": "The cloud-margin claim is well-supported but vulnerable to capex; the valuation claim is contradicted by the 5-year multiple; the supply-chain claim is unsupported in the record. Net: Contested.",
+  "weighed_stances": { "bull": 0.45, "bear": 0.30, "caution": 0.25 },
+  "conflict_map": [
+    {
+      "claim_under_test": "Cloud margins keep expanding",
+      "crack_type": "vulnerable",
+      "severity": "high",
+      "stance_source": "bear",
+      "citations": [ { "source_id": "doc-msft-10k-2025", "locator": "Item 7, MD&A, p.48", "quote": "Capital expenditures rose materially to support AI infrastructure…" } ],
+      "what_would_resolve": "Next-quarter segment-margin disclosure showing cloud gross margin >= prior period",
+      "resolved": false
+    },
+    {
+      "claim_under_test": "Premium valuation is justified",
+      "crack_type": "contradicted",
+      "severity": "medium",
+      "stance_source": "bear",
+      "citations": [ { "source_id": "doc-peer-valuation", "locator": "derived", "quote": "Forward multiple above trailing 5-year mean…" } ],
+      "what_would_resolve": "A re-rating or an earnings re-base",
+      "resolved": false
+    },
+    {
+      "claim_under_test": "Supply-chain position is a moat",
+      "crack_type": "unsupported",
+      "severity": "low",
+      "stance_source": "caution",
+      "citations": [],
+      "what_would_resolve": "A competitive/consensus source for the supply-chain lens",
+      "resolved": false
+    }
+  ],
+  "run": {
+    "run_id": "sk-20260614-0700-a3f9",
+    "generated_at": "2026-06-14T07:00:00Z",
+    "model": "claude-sonnet-4-6",
+    "planner_model": "gpt-4o-mini",
+    "total_ms": 8400,
+    "retrievals_total": 14,
+    "lenses_with_evidence": 5,
+    "agents": [
+      { "agent": "bull",    "status": "completed", "latency_ms": 2100, "retrievals": 6, "confidence": 0.66 },
+      { "agent": "bear",    "status": "completed", "latency_ms": 2300, "retrievals": 5, "confidence": 0.58 },
+      { "agent": "caution", "status": "completed", "note": "data gap", "latency_ms": 1800, "retrievals": 3, "confidence": 0.60 },
+      { "agent": "cio",     "status": "completed", "latency_ms": 2200 }
+    ]
+  },
+  "citations": [
+    { "source_id": "doc-msft-10k-2025", "locator": "Item 7, MD&A, p.48", "knowledge_source": "blob://public-docs/msft-10k-2025.pdf" },
+    { "source_id": "doc-peer-valuation", "locator": "derived", "knowledge_source": "blob://public-docs/peer-valuation.csv" }
+  ],
+  "disclaimer": "Analytical commentary, not investment advice. Not a BUY/SELL/HOLD recommendation."
+}

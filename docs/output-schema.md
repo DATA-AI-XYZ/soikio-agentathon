@@ -67,4 +67,53 @@ Every material claim references one of these:
     {
       "claim_under_test": "Cloud margins keep expanding",
       "crack_type": "vulnerable",              // contradicted | unsupported | vulnerable
-      "severity": "high",                       // high
+      "severity": "high",                       // high | medium | low (computed in code)
+      "what_would_resolve_it": "Forward margin guidance in the next 10-Q",
+      "citations": [ { "source_id": "doc-msft-10k-2025", "locator": "Item 7" } ]
+    }
+  ],
+  "domain_findings": [                         // per-lens grounded evidence (six specialists)
+    { "lens": "fundamental", "summary": "...", "citations": ["doc-..."], "data_gap": false }
+  ],
+  "run": {
+    "run_id": "sk-2026-06-14-msft-01",
+    "created_at": "2026-06-14T14:32:00+01:00",
+    "corpus_version": "public-docs@2026-06-12",
+    "model": "claude-sonnet-4-6"
+  },
+  "citations": [ /* deduped union of every citation referenced above */ ]
+}
+```
+
+## Review block (Reviewer agent)
+
+Attached by the Reviewer, which runs *after* the CIO and compares this brief to the user's stored run history (`src/memory.py`). Deltas are **computed in code** (`src/reviewer.py` → `compute_deltas`); the agent writes only the narrative and feedback. Cracks are keyed by `(claim_under_test, crack_type)`.
+
+```json
+"review": {
+  "vs_prior_run": {
+    "had_prior": true,
+    "prior_run_id": "sk-2026-06-11-msft-03",
+    "prior_verdict": "Breaks",
+    "current_verdict": "Contested",
+    "verdict_change": "improved",              // improved | deteriorated | unchanged
+    "cracks_healed":     ["Cloud margins keep expanding [vulnerable]"],
+    "cracks_new":        [],
+    "cracks_persisting": ["Premium valuation is justified [contradicted]"],
+    "confidence_delta": 0.07,
+    "note": "..."
+  },
+  "vs_history": {
+    "runs_considered": 12,
+    "runs_this_entity": 3,
+    "verdict_mix": { "Holds": 4, "Contested": 6, "Breaks": 2 },
+    "recurring_crack_themes": ["valuation"],
+    "pattern_note": "..."
+  },
+  "calibration": {
+    "status": "tracking",                      // insufficient_history | tracking | calibrated
+    "note": "Consistency and drift are measured from stored runs. Predictive calibration requires outcome capture over time."
+  },
+  "feedback": [ "actionable bullet", "..." ]
+}
+```
