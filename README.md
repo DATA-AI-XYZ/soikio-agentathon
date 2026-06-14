@@ -34,7 +34,7 @@ Your investment thesis  ──►  tested against  ──►  Foundry IQ (public
    Robustness verdict — Holds / Contested / Breaks
 ```
 
-The six lenses each stance applies: **Macro · Fundamental · Technical/Quant · Risk · Event-driven · Supply-chain**.
+The six lenses each stance applies: **Macro · Fundamental · Technical · Risk · Valuation · Supply-chain** (the canonical taxonomy, ADR-0016).
 
 Full diagram: [`docs/architecture.svg`](docs/architecture.svg). Design rationale: [`docs/architecture.md`](docs/architecture.md). Azure resources: [`docs/azure-architecture.svg`](docs/azure-architecture.svg).
 
@@ -49,6 +49,22 @@ Full diagram: [`docs/architecture.svg`](docs/architecture.svg). Design rationale
 | Claude (Anthropic) | the four agents' reasoning |
 | Azure OpenAI (small) | Foundry IQ retrieval query planning only |
 | Microsoft Entra ID + managed identity | permission-aware access |
+
+## Roadmap — experimental, not yet wired
+
+> **These components are drafted on disk but standalone / experimental.** The shipped pipeline today is `extract → Bull/Bear/Caution → CIO → verdict`; `agent.run` does **not** call any of the items below yet. They are tracked as the next wave (OKR-2026-Q3) and each ships behind its own story + tests before it earns a "live" claim — this README will not describe them as running until then.
+
+- **Auto-deployed frontend** — `web/` + `.github/workflows/deploy-pages.yml` (drafted; one-time GitHub Pages enablement still pending).
+- **Memory / persistence** — `src/memory.py` (standalone module — append-only local-JSON / Azure Blob store; not yet called by the run path).
+- **Domain agents** — six per-lens specialists (`src/domains.py`, `prompts/domains.md`), experimental; not yet integrated ahead of the debate. Intended lenses follow the canonical taxonomy (ADR-0016).
+- **History & dashboard** — `web/history.html` (renders illustrative sample data; store-backed listing pending the persistence + API stories).
+- **Reviewer agent** — `src/reviewer.py` (standalone retrospective; not yet integrated after the CIO). Deltas are computed in code, not by the model; predictive calibration stays `tracking` until outcome data exists.
+
+See [`docs/upgrades.md`](docs/upgrades.md).
+
+## Web frontend
+
+A self-contained demo UI — submit → run → cited conflict map, in the SoiKio brand. Open [`web/index.html`](web/index.html) in a browser (no build, no backend). It renders the [`web/sample-brief.json`](web/sample-brief.json) contract (matches [`docs/output-schema.md`](docs/output-schema.md)); to go live, swap the simulated run for a `/api/redteam` call returning that shape. See [`web/README.md`](web/README.md).
 
 ## How to run (usage)
 
