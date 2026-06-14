@@ -11,6 +11,8 @@
 | Track | Reasoning Agents (Microsoft Foundry) |
 | Microsoft IQ layer | Foundry IQ |
 | Repository (public) | https://github.com/DATA-AI-XYZ/soikio-agentathon |
+| Repository visibility | `<confirm: public>` — verify `gh repo view --json visibility` → `PUBLIC` |
+| **Live demo (GitHub Pages) URL** | `<PASTE-PAGES-URL-AFTER-ENABLING-PAGES>` |
 | Demo video | `demo/demo.mp4` (+ link in `demo/DEMO-SCRIPT.md`) |
 | **Submission confirmation URL** | `<PASTE-REAL-PORTAL-URL-HERE>` |
 | **Submission timestamp** | `<paste real ISO date, e.g. YEAR-MM-DDThh:mm±00:00>` |
