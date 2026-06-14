@@ -6,12 +6,25 @@ Run with: `uvicorn server:app --app-dir src --host 0.0.0.0 --port 8000`.
 """
 from __future__ import annotations
 
+import os
+
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
 import agent  # bare import — src/ is on sys.path (see Dockerfile --app-dir / PYTHONPATH)
 
 app = FastAPI(title="Soikio thesis red-team", version="1.0")
+
+# App Insights via OpenTelemetry (STORY-06.3.02 AC-2): when the connection string is
+# present, emit request traces + latency. No-op locally (var unset) so dev/tests are unaffected.
+_appi = os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING", "").strip()
+if _appi:
+    from azure.monitor.opentelemetry import configure_azure_monitor
+
+    configure_azure_monitor(connection_string=_appi)
+    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
+    FastAPIInstrumentor.instrument_app(app)
 
 
 class AnalyzeRequest(BaseModel):

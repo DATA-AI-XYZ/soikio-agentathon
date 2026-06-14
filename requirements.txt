@@ -11,5 +11,7 @@ pydantic==2.13.4                 # output-schema validation
 
 fastapi==0.115.6                 # thin HTTP wrapper around agent.run (FEAT-06.3, src/server.py)
 uvicorn[standard]==0.34.0        # ASGI server for the container entrypoint
+azure-monitor-opentelemetry==1.6.4          # App Insights traces from the hosted app (FEAT-06.3 AC-2)
+opentelemetry-instrumentation-fastapi==0.49b2  # request-span instrumentation for FastAPI
 
 pytest==9.1.0                    # test runner for tests/ (TESTPLAN-01.3.x onward)
