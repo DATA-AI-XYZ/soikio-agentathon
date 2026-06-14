@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>SoiKio · Thesis Red-Team</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#020202; --s0:#0A0A0A; --s1:#111111; --s2:#1A1A1A; --s3:#222222;
+    --bs:rgba(201,169,97,0.07); --bd:rgba(201,169,97,0.14); --bh:rgba(201,169,97,0.24);
+    --accent:#C9A961; --accent-dim:#9A7D2E; --glow:rgba(201,169,97,0.12);
+    --t1:#E8E4DC; --t2:#A8A29E; --t3:#78716C; --t4:#57534E;
+    --bull:#4ADE80; --bear:#F87171; --caution:#FBBF24; --neutral:#94A3B8;
+    --disp:'Playfair Display',Georgia,serif; --body:'Inter',-apple-system,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--canvas);color:var(--t1);font-family:var(--body);font-size:15px;line-height:1.6;}
+  .mono{font-family:var(--mono);} .disp{font-family:var(--disp);}
+  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);}
+  a{color:var(--accent);text-decoration:none;}
+  .wrap{max-width:960px;margin:0 auto;padding:0 28px;}
+
+  /* top bar */
+  .topbar{border-bottom:1px solid var(--bd);background:var(--s0);position:sticky;top:0;z-index:5;}
+  .topbar .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;}
+  .brand{font-family:var(--disp);font-size:22px;letter-spacing:-.01em;}
+  .brand em{color:var(--accent);font-style:italic;}
+  .brand small{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--t3);margin-left:10px;}
+  .navlink{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--t2);cursor:pointer;}
+  .navlink:hover{color:var(--accent);}
+
+  .banner{background:linear-gradient(90deg,var(--glow) 0%,var(--s0) 60%);border:1px solid var(--bd);border-left:2px solid var(--accent);padding:10px 16px;margin:18px 0;font-size:12px;color:var(--t2);}
+  .banner b{color:var(--t1);}
+
+  .view{display:none;} .view.on{display:block;}
+
+  /* submit */
+  .hero{padding:56px 0 8px;}
+  .hero h1{font-family:var(--disp);font-size:52px;line-height:1.05;font-weight:400;letter-spacing:-.02em;margin:14px 0 18px;}
+  .hero h1 em{color:inherit;font-style:normal;}
+  .hero .deck{font-size:17px;color:var(--t2);max-width:680px;margin-bottom:8px;}
+  .panel{background:var(--s0);border:1px solid var(--bs);padding:28px;margin:32px 0 56px;}
+  .field{margin-bottom:20px;}
+  .field label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--t3);margin-bottom:8px;}
+  .field input,.field textarea{width:100%;background:var(--s1);border:1px solid var(--bd);color:var(--t1);font-family:var(--body);font-size:15px;padding:12px 14px;border-radius:2px;outline:none;}
+  .field input:focus,.field textarea:focus{border-color:var(--accent);}
+  .field textarea{min-height:120px;resize:vertical;line-height:1.6;}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .chip{font-family:var(--mono);font-size:11px;color:var(--t2);border:1px solid var(--bd);padding:5px 10px;border-radius:999px;cursor:pointer;}
+  .chip:hover{border-color:var(--accent);color:var(--accent);}
+  .cta{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:#0A0A0A;font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;border:none;padding:14px 26px;border-radius:2px;cursor:pointer;}
+  .cta:hover{background:#d8bd7e;}
+  .hint{font-size:12px;color:var(--t3);margin-top:14px;}
+
+  /* run state */
+  .run{padding:60px 0;}
+  .run h2{font-family:var(--disp);font-size:30px;font-weight:400;color:var(--t1);margin-bottom:6px;}
+  .runrow{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--bs);font-size:14px;}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--t4);flex:none;}
+  .dot.go{background:var(--accent);box-shadow:0 0 10px var(--glow);} .dot.ok{background:var(--bull);} .dot.warn{background:var(--caution);}
+  .runrow .nm{width:120px;color:var(--t1);} .runrow .meta{color:var(--t3);font-family:var(--mono);font-size:11px;margin-left:auto;}
+
+  /* report */
+  .rhead{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:flex-start;padding:36px 0 0;}
+  .tk{font-family:var(--disp);font-size:46px;line-height:1;font-weight:400;}
+  .co{color:var(--t3);font-family:var(--mono);font-size:11px;letter-spacing:.08em;margin-top:8px;}
+  .thesisline{font-size:13.5px;color:var(--t2);margin-top:14px;border-left:2px solid var(--accent);padding:8px 14px;background:var(--s0);max-width:560px;}
+  .thesisline em{color:var(--t1);font-style:italic;font-family:var(--disp);}
+  .vbox{text-align:right;min-width:230px;}
+  .vpill{display:inline-block;font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.06em;padding:7px 16px;border-radius:4px;}
+  .vpill.contested{background:rgba(251,191,36,.12);color:var(--caution);border:1px solid rgba(251,191,36,.3);}
+  .lean{font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:8px;}
+  .meter{margin-top:12px;} .meter .l{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--t3);margin-bottom:4px;}
+  .bar{height:5px;background:var(--s2);border-radius:999px;overflow:hidden;} .bar>span{display:block;height:100%;}
+  .bar>span.c{background:var(--accent);} .bar>span.d{background:var(--neutral);}
+
+  .wbar{display:flex;height:24px;border:1px solid var(--bd);border-radius:3px;overflow:hidden;font-family:var(--mono);font-size:10px;color:#0A0A0A;font-weight:500;margin:28px 0 8px;}
+  .wbar>div{display:flex;align-items:center;justify-content:center;}
+  .wb{background:var(--bull);} .wr{background:var(--bear);} .wc{background:var(--caution);}
+  .wlbl{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);}
+
+  .switch{display:inline-flex;gap:4px;background:var(--s1);border:1px solid var(--bd);border-radius:3px;padding:3px;margin:32px 0 14px;}
+  .switch button{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);background:none;border:none;padding:7px 14px;cursor:pointer;border-radius:2px;}
+  .switch button.on{background:var(--s3);color:var(--accent);}
+  .pane{display:none;} .pane.on{display:block;}
+
+  .sect{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin:40px 0 6px;}
+  .sectsub{font-size:12px;color:var(--t3);margin-bottom:16px;}
+
+  .crack{background:var(--s0);border:1px solid var(--bs);border-left:2px solid var(--accent);padding:16px 18px;margin-bottom:12px;}
+  .crack .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .sev{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.06em;padding:3px 9px;border-radius:3px;}
+  .sev.high{background:rgba(248,113,113,.12);color:var(--bear);border:1px solid rgba(248,113,113,.3);}
+  .sev.med{background:rgba(251,191,36,.12);color:var(--caution);border:1px solid rgba(251,191,36,.3);}
+  .sev.low{background:var(--s2);color:var(--neutral);border:1px solid var(--bd);}
+  .ctype{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);}
+  .claim{flex:1;min-width:55%;font-size:14.5px;color:var(--t1);}
+  .cite{margin-top:12px;}
+  .citebtn{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--accent);background:none;border:1px solid var(--bd);border-radius:3px;padding:4px 11px;cursor:pointer;}
+  .citebtn:hover{border-color:var(--accent);background:var(--glow);}
+  .citebody{display:none;margin-top:12px;background:var(--s1);border:1px solid var(--bs);padding:12px 14px;}
+  .citebody.open{display:block;}
+  .citebody .q{font-family:var(--disp);font-style:italic;color:var(--t1);font-size:14px;}
+  .citebody .src{font-family:var(--mono);font-size:10.5px;color:var(--t3);margin-top:6px;}
+  .resolve{font-size:12.5px;color:var(--t2);margin-top:12px;} .resolve b{color:var(--accent);font-weight:500;}
+
+  table.health{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px;}
+  table.health th{text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);padding:8px 10px;border-bottom:1px solid var(--bd);font-weight:500;}
+  table.health td{padding:11px 10px;border-bottom:1px solid var(--bs);color:var(--t2);}
+  table.health td.ag{color:var(--t1);} .mn{font-family:var(--mono);font-size:12px;}
+
+  .foot{margin:64px 0 48px;padding-top:24px;border-top:1px solid var(--bs);font-family:var(--mono);font-size:11px;color:var(--t3);line-height:1.8;}
+  .foot em{font-family:var(--mono);color:var(--t1);font-style:normal;font-size:11px;}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">
+  <div class="brand">Soi<em>Kio</em><small>Thesis Red-Team</small></div>
+  <div class="navlink" onclick="goSubmit()">＋ New analysis</div>
+</div></div>
+
+<div class="wrap">
+  <div class="banner"><b>Prototype.</b> SoiKio brand v1.3.4 (void). The MSFT figures below are <b>illustrative sample data</b> to show the interface — not a real analysis.</div>
+
+  <!-- ============ SUBMIT ============ -->
+  <section class="view on" id="v-submit">
+    <div class="hero">
+      <div class="eyebrow">Kintsugi · disagreement is signal</div>
+      <h1>Bring a thesis.<br>Watch it get <em>red-teamed.</em></h1>
+      <p class="deck">Bull steelmans it, Bear and Caution attack it across six analytical lenses — grounded in public filings, every figure cited. You get a conflict map of exactly where your thesis cracks.</p>
+    </div>
+    <div class="panel">
+      <div class="field">
+        <label>Equity</label>
+        <input id="ticker" value="MSFT" placeholder="Ticker — e.g. NVDA"/>
+      </div>
+      <div class="field">
+        <label>Your investment thesis</label>
+        <textarea id="thesis" placeholder="Paste your thesis or IC memo…">Cloud-led margin expansion makes MSFT durably undervalued; the premium multiple is justified and its supply-chain position is a moat.</textarea>
+        <div class="chips">
+          <span class="chip" onclick="ex(this)">Margins keep expanding</span>
+          <span class="chip" onclick="ex(this)">Valuation is justified</span>
+          <span class="chip" onclick="ex(this)">Moat is durable</span>
+        </div>
+      </div>
+      <button class="cta" onclick="runIt()">Run red-team →</button>
+      <div class="hint">Analysis, not advice — never BUY / SELL / HOLD. Runs against public filings only.</div>
+    </div>
+  </section>
+
+  <!-- ============ RUN ============ -->
+  <section class="view" id="v-run">
+    <div class="run">
+      <div class="eyebrow">Run sk-20260612-1432</div>
+      <h2 class="disp">Red-teaming the thesis…</h2>
+      <p style="color:var(--t3);font-size:13px;margin-bottom:24px;">Grounding every claim in the public record via Foundry IQ.</p>
+      <div class="runrow"><span class="dot ok" id="d-ex"></span><span class="nm">Extract claims</span><span class="meta" id="m-ex">3 claims · done</span></div>
+      <div class="runrow"><span class="dot" id="d-bull"></span><span class="nm">Bull</span><span class="meta" id="m-bull">queued</span></div>
+      <div class="runrow"><span class="dot" id="d-bear"></span><span class="nm">Bear</span><span class="meta" id="m-bear">queued</span></div>
+      <div class="runrow"><span class="dot" id="d-cau"></span><span class="nm">Caution</span><span class="meta" id="m-cau">queued</span></div>
+      <div class="runrow"><span class="dot" id="d-cio"></span><span class="nm">CIO</span><span class="meta" id="m-cio">queued</span></div>
+    </div>
+  </section>
+
+  <!-- ============ REPORT ============ -->
+  <section class="view" id="v-report">
+    <div class="rhead">
+      <div>
+        <div class="eyebrow">Cited conflict map</div>
+        <div class="tk disp">MSFT</div>
+        <div class="co">Microsoft Corporation · NASDAQ · generated 12 Jun 2026</div>
+        <div class="thesisline">Thesis under test: <em>“Cloud-led margin expansion makes MSFT durably undervalued.”</em></div>
+      </div>
+      <div class="vbox">
+        <div class="vpill contested">◑ Thesis: Contested</div>
+        <div class="lean">equity lean: Bullish (secondary)</div>
+        <div class="meter"><div class="l"><span>Confidence</span><span>0.62</span></div><div class="bar"><span class="c" style="width:62%"></span></div></div>
+        <div class="meter"><div class="l"><span>Data completeness</span><span>0.55</span></div><div class="bar"><span class="d" style="width:55%"></span></div></div>
+      </div>
+    </div>
+
+    <div class="wlbl">Stance weighting</div>
+    <div class="wbar"><div class="wb" style="width:45%">Bull 45%</div><div class="wr" style="width:30%">Bear 30%</div><div class="wc" style="width:25%">Caution 25%</div></div>
+
+    <div class="switch">
+      <button class="on" onclick="pane(this,'map')">Conflict map</button>
+      <button onclick="pane(this,'review')">Reviewer</button>
+      <button onclick="pane(this,'health')">Agent run</button>
+    </div>
+
+    <div class="pane on" id="p-map">
+      <div class="sect">Where the thesis cracks</div>
+      <div class="sectsub">Ranked by severity · ⚡ could break the thesis · click a crack to verify its source.</div>
+
+      <div class="crack">
+        <div class="top"><span class="sev high">⚡ high</span><span class="ctype">vulnerable</span><span class="claim">“Cloud margins keep expanding” — holds now, but capex intensity threatens it.</span></div>
+        <div class="cite"><button class="citebtn" onclick="tog(this)">◷ source</button><div class="citebody"><div class="q">“Capital expenditures rose materially to support AI infrastructure…”</div><div class="src">msft-10k-2025.pdf · Item 7, MD&amp;A, p.48</div></div></div>
+        <div class="resolve"><b>Would resolve with:</b> next-quarter segment-margin disclosure showing cloud gross margin ≥ prior period.</div>
+      </div>
+      <div class="crack">
+        <div class="top"><span class="sev med">medium</span><span class="ctype">contradicted</span><span class="claim">“Premium valuation is justified” — the multiple sits above its 5-year mean.</span></div>
+        <div class="cite"><button class="citebtn" onclick="tog(this)">◷ source</button><div class="citebody"><div class="q">“Forward multiple above trailing 5-year mean…”</div><div class="src">peer-valuation.csv · derived</div></div></div>
+        <div class="resolve"><b>Would resolve with:</b> a re-rating or an earnings re-base.</div>
+      </div>
+      <div class="crack">
+        <div class="top"><span class="sev low">low</span><span class="ctype">unsupported</span><span class="claim">“Supply-chain position is a moat” — no document in the knowledge base addresses it.</span></div>
+        <div class="resolve"><b>Would resolve with:</b> a competitive / consensus source for the supply-chain lens.</div>
+      </div>
+    </div>
+
+    <!-- STORY-09.3.01 — reviewer-feedback panel: renders report.review (vs your run history) -->
+    <div class="pane" id="p-review">
+      <div class="sect">Reviewer · vs your run history</div>
+      <div class="sectsub">How this thesis's cracks moved since your last stored run — deltas computed in code, never the model.</div>
+      <div id="reviewer-feedback" class="reviewer-feedback">
+        <div id="rev-empty" class="resolve">No prior run for this entity yet — <b>insufficient history</b>. Healed / persisting cracks appear from the next run on.</div>
+        <div id="rev-body" style="display:none;">
+          <div class="crack"><div class="top"><span class="ctype">verdict change</span><span class="claim" id="rev-verdict-change">—</span></div>
+            <div class="resolve">Confidence Δ <span id="rev-conf-delta">—</span> · prior run <span class="mn" id="rev-prior-id">—</span></div></div>
+          <div class="sect" style="margin-top:24px;">Cracks healed</div><ul id="rev-healed" class="mono"></ul>
+          <div class="sect">New cracks</div><ul id="rev-new" class="mono"></ul>
+          <div class="sect">Still persisting</div><ul id="rev-persisting" class="mono"></ul>
+          <div class="resolve" style="margin-top:18px;">Calibration: <b id="rev-calibration">tracking</b> — <span id="rev-cal-note">predictive calibration needs outcome capture over time.</span></div>
+          <ul id="rev-feedback"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="pane" id="p-health">
+      <div class="sect">Agent run · health</div>
+      <div class="sectsub mono" style="font-family:var(--mono);">run sk-20260612-1432-a3f9 · agents claude-sonnet-4-6 · planner gpt-4o-mini · 14 Foundry IQ retrievals · 5 / 6 lenses with evidence · 8.4s</div>
+      <table class="health">
+        <thead><tr><th>Agent</th><th>Status</th><th>Latency</th><th>Retrievals</th><th>Confidence</th></tr></thead>
+        <tbody>
+          <tr><td class="ag">Bull</td><td><span class="dot ok" style="display:inline-block;margin-right:6px;"></span>completed</td><td class="mn">2.1s</td><td class="mn">6</td><td class="mn">0.66</td></tr>
+          <tr><td class="ag">Bear</td><td><span class="dot ok" style="display:inline-block;margin-right:6px;"></span>completed</td><td class="mn">2.3s</td><td class="mn">5</td><td class="mn">0.58</td></tr>
+          <tr><td class="ag">Caution</td><td><span class="dot warn" style="display:inline-block;margin-right:6px;"></span>completed · data gap</td><td class="mn">1.8s</td><td class="mn">3</td><td class="mn">0.60</td></tr>
+          <tr><td class="ag">CIO</td><td><span class="dot ok" style="display:inline-block;margin-right:6px;"></span>completed</td><td class="mn">2.2s</td><td class="mn">—</td><td class="mn">verdict 0.62</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="foot">
+      <em>Analysis, not advice.</em><br>
+      Verdict refers to the robustness of the thesis, not a position recommendation. Never BUY / SELL / HOLD. Every figure is cited or dropped (cite-or-silence). Quality is bounded by the documents provided. — Illustrative sample data.
+    </div>
+  </section>
+</div>
+
+<script>
+  function show(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));document.getElementById(id).classList.add('on');window.scrollTo(0,0);}
+  function goSubmit(){show('v-submit');}
+  function ex(el){document.getElementById('thesis').focus();}
+  function tog(b){b.parentElement.querySelector('.citebody').classList.toggle('open');}
+  function pane(btn,id){document.querySelectorAll('.switch button').forEach(x=>x.classList.remove('on'));btn.classList.add('on');document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));document.getElementById('p-'+id).classList.add('on');}
+
+  // Brief/run text is user-submitted — escape every interpolated field (no stored XSS).
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function _list(id, arr){ document.getElementById(id).innerHTML = (arr&&arr.length) ? arr.map(x=>`<li>${esc(x)}</li>`).join('') : '<li style="color:var(--t4);list-style:none;">none</li>'; }
+
+  // STORY-09.3.01 — render the reviewer `review` block (docs/output-schema.md shape).
+  function renderReview(review){
+    const vp = (review||{}).vs_prior_run || {};
+    const has = !!vp.had_prior;
+    document.getElementById('rev-empty').style.display = has ? 'none' : 'block';
+    document.getElementById('rev-body').style.display  = has ? 'block' : 'none';
+    if(!has) return;
+    document.getElementById('rev-verdict-change').textContent = esc(vp.verdict_change || '—');
+    document.getElementById('rev-conf-delta').textContent     = (vp.confidence_delta!=null ? esc(vp.confidence_delta) : '—');
+    document.getElementById('rev-prior-id').textContent       = esc(vp.prior_run_id || '—');
+    _list('rev-healed',     vp.cracks_healed);
+    _list('rev-new',        vp.cracks_new);
+    _list('rev-persisting', vp.cracks_persisting);
+    const cal = (review||{}).calibration || {};
+    document.getElementById('rev-calibration').textContent = esc(cal.status || 'tracking');
+    if(cal.note) document.getElementById('rev-cal-note').textContent = esc(cal.note);
+    _list('rev-feedback', (review||{}).feedback);
+  }
+  function step(dot,meta,txt,cls){return new Promise(r=>setTimeout(()=>{var d=document.getElementById(dot);d.className='dot '+cls;document.getElementById(meta).textContent=txt;r();},650);}
+  async function runIt(){
+    show('v-run');
+    ['d-bull','d-bear','d-cau','d-cio'].forEach(i=>document.getElementById(i).className='dot');
+    ['m-bull','m-bear','m-cau','m-cio'].forEach(i=>document.getElementById(i).textContent='queued');
+    document.getElementById('d-bull').className='dot go';document.getElementById('m-bull').textContent='reasoning…';
+    await step('d-bull','m-bull','done · 6 retrievals','ok');
+    document.getElementById('d-bear').className='dot go';document.getElementById('m-bear').textContent='reasoning…';
+    await step('d-bear','m-bear','done · 5 retrievals','ok');
+    document.getElementById('d-cau').className='dot go';document.getElementById('m-cau').textContent='reasoning…';
+    await step('d-cau','m-cau','done · data gap','warn');
+    document.getElementById('d-cio').className='dot go';document.getElementById('m-cio').textContent='adjudicating…';
+    await step('d-cio','m-cio','verdict: Contested','ok');
+    setTimeout(()=>show('v-report'),500);
+  }
+</script>
+</body>
+</html>
