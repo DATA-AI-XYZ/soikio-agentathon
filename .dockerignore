@@ -1,0 +1,28 @@
+# Keep the ACR build context lean and secret-free (STORY-06.3.01).
+# SECRETS — never ship into the image (key comes from Key Vault at runtime).
+.env
+.env.*
+!.env.example
+
+# Local / VCS / build cruft
+.venv/
+.git/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+
+# Not needed at runtime (live retrieval uses Azure Search, not local corpus)
+knowledge/
+out/
+demo/
+docs/
+evals/
+tests/
+setup/
+scripts/
+
+# PM kit + node tooling
+_00-Project-Management/
+node_modules/
+*.html

@@ -9,4 +9,7 @@ openai==2.41.1                   # Azure OpenAI — Foundry IQ query planner (gp
 azure-ai-projects==2.2.0         # Foundry project / Agent Service (EPIC-02, Option A)
 pydantic==2.13.4                 # output-schema validation
 
+fastapi==0.115.6                 # thin HTTP wrapper around agent.run (FEAT-06.3, src/server.py)
+uvicorn[standard]==0.34.0        # ASGI server for the container entrypoint
+
 pytest==9.1.0                    # test runner for tests/ (TESTPLAN-01.3.x onward)
