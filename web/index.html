@@ -187,6 +187,7 @@
 
     <div class="switch">
       <button class="on" onclick="pane(this,'map')">Conflict map</button>
+      <button onclick="pane(this,'domains')">Domains</button>
       <button onclick="pane(this,'review')">Reviewer</button>
       <button onclick="pane(this,'health')">Agent run</button>
     </div>
@@ -208,6 +209,23 @@
       <div class="crack">
         <div class="top"><span class="sev low">low</span><span class="ctype">unsupported</span><span class="claim">“Supply-chain position is a moat” — no document in the knowledge base addresses it.</span></div>
         <div class="resolve"><b>Would resolve with:</b> a competitive / consensus source for the supply-chain lens.</div>
+      </div>
+    </div>
+
+    <!-- STORY-09.3.02 — domain-findings panel: six per-lens specialists (ADR-0016) -->
+    <div class="pane" id="p-domains">
+      <div class="sect">Domain specialists · per-lens evidence</div>
+      <div class="sectsub">Six lenses gather grounded evidence before the debate. A lens with no covering document is a <b>data gap</b>, never an invented crack.</div>
+      <div id="domain-findings" class="domain-findings">
+        <table class="health"><thead><tr><th>Lens</th><th>Net lean</th><th>Finding</th></tr></thead><tbody>
+          <tr class="dom-lens" data-lens="macro"><td class="ag">Macro</td><td class="dom-lean mn">—</td><td class="dom-state">—</td></tr>
+          <tr class="dom-lens" data-lens="fundamental"><td class="ag">Fundamental</td><td class="dom-lean mn">—</td><td class="dom-state">—</td></tr>
+          <tr class="dom-lens" data-lens="technical"><td class="ag">Technical</td><td class="dom-lean mn">—</td><td class="dom-state">—</td></tr>
+          <tr class="dom-lens" data-lens="risk"><td class="ag">Risk</td><td class="dom-lean mn">—</td><td class="dom-state">—</td></tr>
+          <tr class="dom-lens" data-lens="valuation"><td class="ag">Valuation</td><td class="dom-lean mn">—</td><td class="dom-state">—</td></tr>
+          <tr class="dom-lens" data-lens="supply_chain"><td class="ag">Supply-chain</td><td class="dom-lean mn">—</td><td class="dom-state">—</td></tr>
+        </tbody></table>
+        <div class="resolve" id="dom-empty" style="margin-top:14px;">No domain findings yet — run an analysis. A lens whose <code class="mn">coverage:false</code> (no covering document) shows as a <b>data gap</b>, not a crack.</div>
       </div>
     </div>
 
@@ -278,6 +296,21 @@
     document.getElementById('rev-calibration').textContent = esc(cal.status || 'tracking');
     if(cal.note) document.getElementById('rev-cal-note').textContent = esc(cal.note);
     _list('rev-feedback', (review||{}).feedback);
+  }
+
+  // STORY-09.3.02 — render the six-lens `domain_findings` array; coverage:false → data gap.
+  function renderDomains(findings){
+    findings = Array.isArray(findings) ? findings : [];
+    document.getElementById('dom-empty').style.display = findings.length ? 'none' : 'block';
+    const byLens = {}; findings.forEach(f=>{ if(f && f.lens) byLens[f.lens] = f; });
+    document.querySelectorAll('#domain-findings .dom-lens').forEach(row=>{
+      const f = byLens[row.getAttribute('data-lens')];
+      const lean = row.querySelector('.dom-lean'), state = row.querySelector('.dom-state');
+      if(!f){ lean.textContent='—'; state.textContent='—'; return; }
+      if(f.coverage === false){ lean.textContent='—'; state.innerHTML='<span style="color:var(--caution)">data gap — no covering document</span>'; return; }
+      lean.textContent = esc(f.net_lean || '—');
+      state.textContent = esc(f.finding || '');
+    });
   }
   function step(dot,meta,txt,cls){return new Promise(r=>setTimeout(()=>{var d=document.getElementById(dot);d.className='dot '+cls;document.getElementById(meta).textContent=txt;r();},650);}
   async function runIt(){
