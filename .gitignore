@@ -29,3 +29,8 @@ runs/
 
 # Internal design / working notes — local reference only, NEVER publish (clean-room)
 docs/design/
+
+# Internal project management + Cowork planning — holds real Azure resource names/endpoints; NEVER publish
+_00-Project-Management/
+# Cowork planning scratch — explicitly ignored (local-only reference, never published)
+_00-Project-Management/20-Requirements/cowork/
