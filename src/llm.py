@@ -27,14 +27,13 @@ _client = None
 
 
 def _key() -> str:
-    k = os.environ.get("ANTHROPIC_API_KEY", "").strip()
-    if k and not k.startswith("sk-ant-..."):
-        return k
-    # production: Key Vault via managed identity
-    from azure.identity import DefaultAzureCredential
-    from azure.keyvault.secrets import SecretClient
-    sc = SecretClient(os.environ["KEY_VAULT_URI"], DefaultAzureCredential())
-    return sc.get_secret(os.environ.get("ANTHROPIC_SECRET_NAME", "anthropic-api-key")).value
+    # Canonical resolution lives in config.py (STORY-06.2.01): local-dev
+    # ANTHROPIC_API_KEY → else Key Vault via managed identity (keyless).
+    try:
+        from .config import get_anthropic_key
+    except ImportError:  # script-style import (no package context)
+        from config import get_anthropic_key  # type: ignore
+    return get_anthropic_key()
 
 
 def _foundry_base() -> str:
