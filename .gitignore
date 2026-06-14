@@ -34,3 +34,8 @@ docs/design/
 _00-Project-Management/
 # Cowork planning scratch — explicitly ignored (local-only reference, never published)
 _00-Project-Management/20-Requirements/cowork/
+
+# As-built ops records — contain real Azure resource names; keep local, NEVER publish
+docs/azure-resources.md
+setup/provision-asbuilt.sh
+setup/deploy-containerapp.sh

@@ -35,11 +35,11 @@ def load_env(path: str = ".env") -> None:
 load_env()
 
 SUB = os.environ["AZURE_SUBSCRIPTION_ID"]
-RG = "REDACTED-resource-group"
+RG = os.environ.get("AZURE_RESOURCE_GROUP", "rg-<proj>-<env>")
 SEARCH_ENDPOINT = os.environ["AZURE_SEARCH_ENDPOINT"]
 KB_NAME = os.environ.get("AZURE_SEARCH_KNOWLEDGE_BASE", "REDACTED-kb")
 KS_NAME = os.environ.get("AZURE_SEARCH_KNOWLEDGE_SOURCE", "REDACTED-docs")
-STORAGE = os.environ.get("AZURE_STORAGE_ACCOUNT", "REDACTED-storage")
+STORAGE = os.environ.get("AZURE_STORAGE_ACCOUNT", "st<proj><env>")
 CONTAINER = os.environ.get("AZURE_STORAGE_CONTAINER", "public-docs")
 OPENAI_ENDPOINT = os.environ["AZURE_OPENAI_ENDPOINT"].rstrip("/")
 PLANNER = os.environ.get("AZURE_OPENAI_PLANNER_DEPLOYMENT", "gpt-4.1-mini")
