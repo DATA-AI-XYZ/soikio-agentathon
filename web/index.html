@@ -312,7 +312,7 @@
       state.textContent = esc(f.finding || '');
     });
   }
-  function step(dot,meta,txt,cls){return new Promise(r=>setTimeout(()=>{var d=document.getElementById(dot);d.className='dot '+cls;document.getElementById(meta).textContent=txt;r();},650);}
+  function step(dot,meta,txt,cls){return new Promise(r=>setTimeout(()=>{var d=document.getElementById(dot);d.className='dot '+cls;document.getElementById(meta).textContent=txt;r();},650));}
   async function runIt(){
     show('v-run');
     ['d-bull','d-bear','d-cau','d-cio'].forEach(i=>document.getElementById(i).className='dot');
