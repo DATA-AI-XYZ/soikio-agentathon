@@ -51,6 +51,16 @@
   .chip{font-family:var(--mono);font-size:11px;color:var(--t2);border:1px solid var(--bd);padding:5px 10px;border-radius:999px;cursor:pointer;}
   .chip:hover{border-color:var(--accent);color:var(--accent);}
   .cta{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:#0A0A0A;font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;border:none;padding:14px 26px;border-radius:2px;cursor:pointer;}
+  .cta[disabled]{opacity:.5;cursor:default;}
+  /* human-in-the-loop approval modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
+  .modal{background:var(--s0);border:1px solid var(--bd);border-left:2px solid var(--accent);max-width:460px;width:100%;padding:28px;}
+  .modal h3{font-family:var(--display,var(--body));font-size:22px;margin:6px 0 6px;color:var(--t1);}
+  .modal .hint{font-size:12.5px;color:var(--t3);margin:0 0 18px;}
+  .modal .field{margin-bottom:14px;}
+  .modal-status{font-size:13px;color:var(--t2);background:var(--s1);border:1px solid var(--bd);padding:11px 13px;margin:6px 0 14px;}
+  .modal-status b{color:var(--t1);}
+  .modal-actions{display:flex;align-items:center;gap:14px;margin-top:6px;}
   .cta:hover{background:#d8bd7e;}
   .hint{font-size:12px;color:var(--t3);margin-top:14px;}
 
@@ -272,6 +282,22 @@
   </section>
 </div>
 
+<!-- ============ APPROVAL MODAL (human-in-the-loop gate) ============ -->
+<div class="modal-bg" id="approval-modal">
+  <div class="modal">
+    <div class="eyebrow">Human-in-the-loop</div>
+    <h3>Request approval to run</h3>
+    <p class="hint">An approver receives a Telegram message and must approve before the four-agent red-team runs. The gate is enforced on the server.</p>
+    <div class="field"><label>Your name</label><input id="ap-name" placeholder="Jane Analyst" autocomplete="name"/></div>
+    <div class="field"><label>Your email</label><input id="ap-email" placeholder="jane@firm.com" autocomplete="email"/></div>
+    <div class="modal-status" id="ap-status" style="display:none;"></div>
+    <div class="modal-actions">
+      <button class="cta" id="ap-submit" onclick="submitApproval()">Request approval →</button>
+      <a class="navlink" href="javascript:void(0)" onclick="closeApproval()">Cancel</a>
+    </div>
+  </div>
+</div>
+
 <script src="config.js"></script>
 <script>
   function show(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));document.getElementById(id).classList.add('on');window.scrollTo(0,0);}
@@ -386,18 +412,89 @@
     renderReview(b.review);
   }
 
-  async function runIt(){
+  // ===== human-in-the-loop gate (STORY-HITL) =====
+  // "Run red-team" → in live mode opens an approval modal (name+email), POSTs /request-approval,
+  // and polls /approval/{id} until an approver taps Approve in Telegram; only THEN does runAnalysis
+  // call /analyze with the one-time run_token. Demo mode (no backend) skips the gate entirely.
+  const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+  let _apTimer = null, _apDeadline = 0;
+
+  function runIt(){
+    if(API_BASE){ openApproval(); }   // live: require approval first
+    else { runAnalysis(null); }       // demo: bundled sample, no gate
+  }
+
+  function openApproval(){
+    const thesis = (document.getElementById('thesis').value||'').trim();
+    if(!thesis){ alert('Enter a thesis first.'); return; }
+    document.getElementById('ap-submit').disabled = false;
+    _apSay('', false);
+    document.getElementById('approval-modal').style.display = 'flex';
+  }
+  function closeApproval(){
+    document.getElementById('approval-modal').style.display = 'none';
+    if(_apTimer){ clearInterval(_apTimer); _apTimer = null; }
+  }
+  function _apSay(msg, on){ const s=document.getElementById('ap-status'); s.style.display=(on===false?'none':'block'); s.innerHTML=msg||''; }
+
+  async function submitApproval(){
+    const name  = (document.getElementById('ap-name').value||'').trim();
+    const email = (document.getElementById('ap-email').value||'').trim();
+    const thesis= (document.getElementById('thesis').value||'').trim();
+    if(!name){ _apSay('Please enter your name.'); return; }
+    if(!EMAIL_RE.test(email)){ _apSay('Please enter a valid email.'); return; }
+    document.getElementById('ap-submit').disabled = true;
+    _apSay('Sending approval request…');
+    let approvalId;
+    try{
+      const r = await fetch(API_BASE + '/request-approval', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ name, email, thesis }) });
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      approvalId = (await r.json()).approval_id;
+    }catch(e){
+      _apSay('Could not send the approval request ('+esc(e.message)+'). Check the backend / Telegram config.');
+      document.getElementById('ap-submit').disabled = false;
+      return;
+    }
+    _apSay('⏳ <b>Waiting for approval on your phone…</b><br>Approve the Telegram message to start the run.');
+    _apDeadline = Date.now() + 180000;   // ~3 min
+    _apTimer = setInterval(()=>pollApproval(approvalId), 2500);
+  }
+
+  async function pollApproval(id){
+    if(Date.now() > _apDeadline){
+      clearInterval(_apTimer); _apTimer = null;
+      _apSay('⌛ Timed out waiting for approval. You can request again.');
+      document.getElementById('ap-submit').disabled = false;
+      return;
+    }
+    try{
+      const s = await fetch(API_BASE + '/approval/' + encodeURIComponent(id)).then(r=>r.json());
+      if(s.status === 'approved'){
+        clearInterval(_apTimer); _apTimer = null;
+        _apSay('✅ <b>Run approved.</b> Starting the red-team…');
+        setTimeout(()=>{ closeApproval(); runAnalysis(s.run_token); }, 900);
+      } else if(s.status === 'rejected'){
+        clearInterval(_apTimer); _apTimer = null;
+        _apSay('❌ Request rejected by the approver.');
+        document.getElementById('ap-submit').disabled = false;
+      }
+    }catch(e){ /* transient poll error — keep trying until the deadline */ }
+  }
+
+  async function runAnalysis(runToken){
     show('v-run');
     _status('', false);
     ['d-bull','d-bear','d-cau','d-cio'].forEach(i=>document.getElementById(i).className='dot');
     ['m-bull','m-bear','m-cau','m-cio'].forEach(i=>document.getElementById(i).textContent='queued');
-    // Kick off the live POST /analyze (if a backend is configured) in parallel with the loading animation.
+    // Kick off the live POST /analyze (with the approved run_token) in parallel with the animation.
     const ticker = (document.getElementById('ticker').value||'').trim();
     const thesis = (document.getElementById('thesis').value||'').trim();
     let live = null;
     if(API_BASE){
-      _status('Loading — calling the live red-team backend at ' + esc(API_BASE) + '; a real analysis can take ~10s…', true);
-      live = fetch(API_BASE + '/analyze', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ thesis, ticker }) })
+      _status('Loading — calling the live red-team backend at ' + esc(API_BASE) + '; a real analysis can take a couple of minutes…', true);
+      live = fetch(API_BASE + '/analyze', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ thesis, ticker, run_token: runToken }) })
         .then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
     }
     document.getElementById('d-bull').className='dot go';document.getElementById('m-bull').textContent='reasoning…';

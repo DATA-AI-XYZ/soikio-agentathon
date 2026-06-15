@@ -57,6 +57,27 @@ def _local_key() -> str:
     return ""
 
 
+def get_secret(env_var: str, secret_name: str | None = None,
+               retries: int = 3, backoff_s: float = 2.0) -> str:
+    """Resolve a non-Anthropic secret the same keyless way (ADR-0010): a local env var first (dev),
+    else Key Vault `secret_name` via the managed identity (prod). Returns "" when neither resolves —
+    callers decide whether that's fatal (e.g. Telegram simply stays disabled). Never raises."""
+    v = os.environ.get(env_var, "").strip()
+    if v:
+        return v
+    vault_uri = os.environ.get("KEY_VAULT_URI", "").strip()
+    if not secret_name or not vault_uri:
+        return ""
+    from azure.keyvault.secrets import SecretClient
+    for attempt in range(retries):
+        try:
+            return SecretClient(vault_uri, credential()).get_secret(secret_name).value
+        except Exception:                      # transient auth/RBAC lag on cold start
+            if attempt < retries - 1:
+                time.sleep(backoff_s * (attempt + 1))
+    return ""
+
+
 def get_anthropic_key(retries: int = 3, backoff_s: float = 2.0) -> str:
     """Return the Anthropic key.
 

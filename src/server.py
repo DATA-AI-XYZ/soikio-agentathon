@@ -6,14 +6,17 @@ Run with: `uvicorn server:app --app-dir src --host 0.0.0.0 --port 8000`.
 """
 from __future__ import annotations
 
+import hmac
 import os
+import re
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
-import agent    # bare import — src/ is on sys.path (see Dockerfile --app-dir / PYTHONPATH)
-import memory   # run-history store (STORY-08.2.03)
+import agent        # bare import — src/ is on sys.path (see Dockerfile --app-dir / PYTHONPATH)
+import approvals    # human-in-the-loop run gate (Telegram), enforced server-side
+import memory       # run-history store (STORY-08.2.03)
 
 app = FastAPI(title="Soikio thesis red-team", version="1.0")
 
@@ -44,8 +47,26 @@ if _appi:
     FastAPIInstrumentor.instrument_app(app)
 
 
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
 class AnalyzeRequest(BaseModel):
     thesis: str = Field(..., min_length=1, description="The investment thesis to red-team.")
+    run_token: str | None = Field(default=None, description="One-time token minted on Telegram approval.")
+
+
+class ApprovalRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=120)
+    email: str = Field(..., min_length=3, max_length=200)
+    thesis: str = Field(..., min_length=1)
+
+    @field_validator("email")
+    @classmethod
+    def _valid_email(cls, v: str) -> str:
+        v = v.strip()
+        if not _EMAIL_RE.match(v):
+            raise ValueError("invalid email")
+        return v
 
 
 @app.get("/health")
@@ -53,12 +74,53 @@ def health() -> dict:
     return {"status": "ok"}
 
 
+@app.post("/request-approval")
+def request_approval(req: ApprovalRequest) -> dict:
+    """Open a human-in-the-loop run gate: store a pending approval and push a Telegram request to the
+    approver. Returns {approval_id} for the client to poll. 502 if the transport can't deliver."""
+    try:
+        approval_id = approvals.request_approval(req.name, req.email, req.thesis)
+    except Exception:
+        raise HTTPException(status_code=502, detail="could not send approval request")
+    return {"approval_id": approval_id}
+
+
+@app.get("/approval/{approval_id}")
+def approval_status(approval_id: str) -> dict:
+    """Poll the gate: {status: pending|approved|rejected[, run_token]}. The run_token appears only
+    once approved, and is what /analyze requires."""
+    a = approvals.get_approval(approval_id)
+    if a is None:
+        raise HTTPException(status_code=404, detail="unknown approval")
+    return a
+
+
+@app.post("/telegram/webhook")
+async def telegram_webhook(
+    request: Request,
+    x_telegram_bot_api_secret_token: str | None = Header(default=None),
+) -> dict:
+    """Telegram callback sink: verify the shared secret header, then apply the approve/reject
+    decision and acknowledge it back on the message."""
+    expected = approvals.webhook_secret()
+    got = x_telegram_bot_api_secret_token or ""
+    if not expected or not hmac.compare_digest(got, expected):
+        raise HTTPException(status_code=403, detail="forbidden")
+    payload = await request.json()
+    approvals.handle_callback(payload)
+    return {"ok": True}
+
+
 @app.post("/analyze")
 def analyze(req: AnalyzeRequest) -> dict:
     """Run the four-agent red-team and return the scored, cited brief.
 
-    Analysis, not advice — `agent.run` enforces the compliance gate; this layer
-    only adapts HTTP <-> the pipeline."""
+    SERVER-SIDE GATE: the repo + this endpoint are public, so the run is allowed only with a valid,
+    unconsumed run_token minted on Telegram approval — consumed here (one-time). Without it, 403.
+    Analysis, not advice — `agent.run` enforces the compliance gate; this layer adapts HTTP <-> the
+    pipeline."""
+    if not approvals.consume_token(req.run_token):
+        raise HTTPException(status_code=403, detail="approval required: run_token missing, invalid, or already used")
     return agent.run(req.thesis)
 
 
