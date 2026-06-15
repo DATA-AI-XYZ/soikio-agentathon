@@ -53,6 +53,7 @@ def run(thesis: str) -> dict:
     support = [p for p in bull if p.get("crack_type") == "support"]
 
     cmap = cio.build_conflict_map(extracted["claims"], cracks)
+    cmap = cio.enrich_conflict_map(cmap, extracted["claims"], sources)  # claim_under_test + citation objects (output-schema)
     active_lenses = sorted({l for c in extracted["claims"] for l in (c.get("lenses") or lenses.MVP_LENSES)}) \
         or sorted(lenses.MVP_LENSES)
     lenses_with_evidence = sorted({s["lens"] for s in sources})

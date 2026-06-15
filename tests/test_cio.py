@@ -50,6 +50,22 @@ def test_resolution_concrete(monkeypatch):
     assert not cio._is_generic("Q3 segment-margin disclosure showing cloud gross margin >= prior period")
 
 
+def test_enrich_conflict_map_schema():
+    """Contract · enrich stamps claim_under_test (claim text by claim_id) and expands bare Sx ids
+    into {source_id, quote, locator} objects from the sources bundle (docs/output-schema.md)."""
+    cracks = [{"claim_id": "c1", "crack_type": "contradicted", "point": "x",
+               "citations": ["S1"], "lens": "risk", "stance": "bear"}]
+    cmap = cio.build_conflict_map(_CLAIMS, cracks)
+    sources = [{"id": "S1", "lens": "risk", "claim_id": "c1",
+                "content": "Export controls may reduce data-center revenue in China."}]
+    out = cio.enrich_conflict_map(cmap, _CLAIMS, sources)
+    assert out[0]["claim_under_test"] == "Data center revenue compounds"   # claim text, not the id
+    assert out[0]["claim_id"] == "c1"                                      # claim_id kept
+    cite = out[0]["citations"][0]
+    assert cite["source_id"] == "S1" and cite["locator"] == "doc-level"
+    assert "Export controls" in cite["quote"]                             # quote drawn from the source
+
+
 def test_brief_fields():
     """AC-4 · the brief header has weighed_stances, thesis_robustness, equity_lean, confidence."""
     cmap = cio.build_conflict_map(_CLAIMS, [])

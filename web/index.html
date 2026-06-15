@@ -123,7 +123,7 @@
 </div></div>
 
 <div class="wrap">
-  <div class="banner"><b>Prototype.</b> SoiKio brand v1.3.4 (void). The MSFT figures below are <b>illustrative sample data</b> to show the interface — not a real analysis.</div>
+  <div class="banner" id="proto-banner"><b>Prototype.</b> SoiKio brand v1.3.4 (void). The MSFT figures below are <b>illustrative sample data</b> to show the interface — not a real analysis.</div>
 
   <!-- ============ SUBMIT ============ -->
   <section class="view on" id="v-submit">
@@ -173,7 +173,7 @@
       <div>
         <div class="eyebrow">Cited conflict map</div>
         <div class="tk disp" id="r-ticker">MSFT</div>
-        <div class="co">Microsoft Corporation · NASDAQ · generated 12 Jun 2026</div>
+        <div class="co" id="r-co">Microsoft Corporation · NASDAQ · generated 12 Jun 2026</div>
         <div class="thesisline">Thesis under test: <em id="r-thesis">“Cloud-led margin expansion makes MSFT durably undervalued.”</em></div>
       </div>
       <div class="vbox">
@@ -322,6 +322,10 @@
   // Empty API_BASE = demo mode (renders the bundled illustrative sample). Set window.SOIKIO_API
   // to the deployed Container App origin to POST a real /analyze. See web/README.md (CORS seam).
   const API_BASE = (window.SOIKIO_API || '').replace(/\/+$/, '');
+  // Live mode (a backend is configured) renders real analyses — hide the "illustrative sample" banner.
+  if(API_BASE){ const pb = document.getElementById('proto-banner'); if(pb) pb.style.display = 'none'; }
+  // ISO timestamp -> "12 Jun 2026"; empty string if absent/unparseable (never throws).
+  function fmtDate(iso){ if(!iso) return ''; const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
   const VERDICT_CLS = { holds:'holds', contested:'contested', breaks:'breaks' };
   const VERDICT_SYM = { holds:'● ', contested:'◑ ', breaks:'○ ' };
   const SEV_CLS = { high:'high', medium:'med', low:'low' };
@@ -331,6 +335,11 @@
   function renderBrief(b){
     b = b || {};
     document.getElementById('r-ticker').textContent = esc((b.entity && b.entity.ticker) || b.ticker || '—');
+    // Company/date line from the brief, not hardcoded chrome: entity.name + the run timestamp.
+    const ent = b.entity || {}, run = b.run || {};
+    const when = fmtDate(run.timestamp || run.created_at);
+    document.getElementById('r-co').textContent =
+      [esc(ent.name || ent.ticker || ''), when ? 'generated ' + when : ''].filter(Boolean).join(' · ');
     document.getElementById('r-thesis').textContent = '“' + esc(b.thesis || '') + '”';
     const rob = String(b.thesis_robustness || 'Contested'), rk = rob.toLowerCase();
     const vp = document.getElementById('r-verdict');
@@ -351,7 +360,7 @@
         const cit = (c.citations||[])[0];
         const sev = SEV_CLS[String(c.severity||'low').toLowerCase()] || 'low';
         const cite = cit ? `<div class="cite"><button class="citebtn" onclick="tog(this)">◷ source</button><div class="citebody"><div class="q">${esc(cit.quote||'')}</div><div class="src">${esc(cit.source_id||'')} · ${esc(cit.locator||'doc-level')}</div></div></div>` : '';
-        const res = c.what_would_resolve ? `<div class="resolve"><b>Would resolve with:</b> ${esc(c.what_would_resolve)}</div>` : '';
+        const res = c.what_would_resolve_it ? `<div class="resolve"><b>Would resolve with:</b> ${esc(c.what_would_resolve_it)}</div>` : '';
         return `<div class="crack"><div class="top"><span class="sev ${sev}">${esc(c.severity||'low')}</span><span class="ctype">${esc(c.crack_type||'')}</span><span class="claim">${esc(c.claim_under_test||'')}</span></div>${cite}${res}</div>`;
       }).join('');
     }

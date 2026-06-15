@@ -45,7 +45,9 @@ def _cracks_html(cmap, claims) -> str:
     out = ""
     for c in cmap:
         sc, ze = _SEV.get(c["severity"], ("#5f6368", "⚡"))
-        cites = " ".join(f"<span class=cite>{_esc(x)}</span>" for x in c.get("citations", [])) \
+        cites = " ".join(
+            f"<span class=cite>{_esc(x.get('source_id') if isinstance(x, dict) else x)}</span>"
+            for x in c.get("citations", [])) \
             or "<span class=nocite>no citation — unsupported</span>"
         flag = ('<span class="figflag">⚠ figure unverified — stripped</span>'
                 if c.get("figure_flagged") else "")

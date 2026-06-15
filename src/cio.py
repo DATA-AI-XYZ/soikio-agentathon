@@ -55,6 +55,32 @@ def build_conflict_map(claims: list[dict], cracks: list[dict]) -> list[dict]:
     return out
 
 
+def _quote(content: str, n: int = 240) -> str:
+    """A short, whitespace-normalised quote from a source chunk for the citation object."""
+    q = " ".join((content or "").split())
+    return (q[:n].rstrip() + "…") if len(q) > n else q
+
+
+def enrich_conflict_map(cmap: list[dict], claims: list[dict], sources: list[dict]) -> list[dict]:
+    """Align the conflict map to docs/output-schema.md (the shape the renderer expects).
+
+    build_conflict_map keys cracks by `claim_id` and carries bare Sx citation ids; the schema +
+    frontend want `claim_under_test` (the claim text) and citation OBJECTS {source_id, quote,
+    locator}. This stamps both, looking the claim text up by claim_id and expanding each Sx id from
+    the gathered `sources` bundle. `claim_id` is kept. Mutates + returns cmap (no LLM)."""
+    claim_text = {c.get("id"): c.get("claim", "") for c in claims}
+    src_by_id = {s.get("id"): s for s in (sources or [])}
+    for c in cmap:
+        c["claim_under_test"] = claim_text.get(c.get("claim_id"), "")
+        c["citations"] = [
+            {"source_id": sid,
+             "quote": _quote(src_by_id[sid]["content"]) if sid in src_by_id else "",
+             "locator": "doc-level"}
+            for sid in (c.get("citations") or [])
+        ]
+    return cmap
+
+
 def robustness(claims: list[dict], cmap: list[dict]) -> str:
     lb = {c["id"]: bool(c.get("load_bearing")) for c in claims}
     high_lb = any(c["severity"] == "high" and lb.get(c["claim_id"]) for c in cmap)
