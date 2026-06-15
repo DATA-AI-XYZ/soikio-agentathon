@@ -7,4 +7,4 @@
 //   window.SOIKIO_API = "https://ca-soikio-prod-eus2.<region>.azurecontainerapps.io";
 // Get the exact FQDN with:
 //   az containerapp show -n ca-soikio-prod-eus2 -g <rg> --query properties.configuration.ingress.fqdn -o tsv
-window.SOIKIO_API = "";
+window.SOIKIO_API = "https://ca-soikio-prod-eus2.yellowbush-e6318baf.eastus2.azurecontainerapps.io";
