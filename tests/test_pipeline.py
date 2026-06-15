@@ -6,6 +6,7 @@ names embed the -k selectors (end_to_end, telemetry, no_azure_calls, degraded_ag
 import agent
 import agents
 import cio
+import domains
 import extract
 import foundry_iq
 
@@ -18,6 +19,7 @@ _EXTRACTED = {
 }
 _SOURCES = [{"id": "S1", "lens": "risk", "claim_id": "c1",
              "content": "China export controls may reduce NVIDIA data-center revenue."}]
+_DOMAINS = [{"lens": "risk", "net_lean": "mixed", "finding": "risk view", "points": [], "coverage": True}]
 
 
 def _fake_run_stance(name, thesis, extracted, sources, extra=""):
@@ -41,6 +43,7 @@ def _stub_offline(monkeypatch):
     monkeypatch.setattr(agents, "gather_grounding", lambda extracted, **k: list(_SOURCES))
     monkeypatch.setattr(agents, "run_stance", _fake_run_stance)
     monkeypatch.setattr(cio, "narrate", _fake_narrate)
+    monkeypatch.setattr(domains, "run_all", lambda *a, **k: list(_DOMAINS))   # six-lens panel stubbed (no Claude)
 
 
 def test_end_to_end(monkeypatch):
@@ -50,6 +53,8 @@ def test_end_to_end(monkeypatch):
     assert brief["thesis_robustness"] in ("Holds", "Contested", "Breaks")
     assert isinstance(brief["conflict_map"], list) and brief["conflict_map"]   # cracks survived
     assert brief["compliance_ok"] is True                                      # no advice in the brief
+    assert brief["entity_in_corpus"] is True                                   # on-entity retrieval
+    assert brief["domain_findings"] == _DOMAINS                                # six-lens panel wired in
 
 
 def test_telemetry(monkeypatch):
@@ -70,6 +75,7 @@ def test_no_azure_calls(monkeypatch):
     monkeypatch.setattr(extract, "extract", lambda thesis: _EXTRACTED)
     monkeypatch.setattr(agents, "run_stance", _fake_run_stance)
     monkeypatch.setattr(cio, "narrate", _fake_narrate)
+    monkeypatch.setattr(domains, "run_all", lambda *a, **k: list(_DOMAINS))   # no live Claude from the panel
     monkeypatch.setenv("FOUNDRY_IQ_BACKEND", "mock")
     brief = agent.run(THESIS)            # gather_grounding runs against the mock; must not raise
     assert brief["thesis_robustness"] in ("Holds", "Contested", "Breaks")
@@ -89,3 +95,29 @@ def test_degraded_agent(monkeypatch):
     degraded = {d["agent"] for d in brief["run"]["degraded"]}
     assert "bear" in degraded                                  # recorded, not dropped
     assert brief["thesis_robustness"] in ("Holds", "Contested", "Breaks")   # run still completes
+
+
+def test_off_corpus_short_circuit(monkeypatch):
+    """Off-corpus guard · when no retrieved source mentions the entity, short-circuit with
+    entity_in_corpus=false and NO stance/domain Claude calls (cost + correctness guard)."""
+    called = {"stance": False, "domains": False}
+    monkeypatch.setattr(extract, "extract", lambda thesis: _EXTRACTED)   # entity = NVIDIA / NVDA
+    # every retrieved chunk is about a different company — zero on-entity evidence
+    monkeypatch.setattr(agents, "gather_grounding", lambda extracted, **k: [
+        {"id": "S1", "lens": "risk", "claim_id": "c1", "content": "Tesla vehicle deliveries grew in 2026."}])
+
+    def _stance_spy(*a, **k):
+        called["stance"] = True
+        return []
+
+    def _domains_spy(*a, **k):
+        called["domains"] = True
+        return []
+
+    monkeypatch.setattr(agents, "run_stance", _stance_spy)
+    monkeypatch.setattr(domains, "run_all", _domains_spy)
+    brief = agent.run("NVIDIA data-center revenue compounds.")
+    assert brief["entity_in_corpus"] is False
+    assert brief["thesis_robustness"] is None
+    assert "knowledge base" in brief["message"]
+    assert called == {"stance": False, "domains": False}       # expensive calls skipped

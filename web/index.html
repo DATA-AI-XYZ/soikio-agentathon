@@ -334,6 +334,24 @@
   // Render a live brief (docs/output-schema.md shape) into the report. esc() every field (no stored XSS).
   function renderBrief(b){
     b = b || {};
+    // Off-corpus: the entity isn't in the KB. Show a prominent notice, NO fake verdict/conflict-map.
+    if(b.entity_in_corpus === false){
+      const ent = b.entity || {}, nm = ent.name || ent.ticker || 'This entity';
+      document.getElementById('r-ticker').textContent = esc(ent.ticker || '—');
+      document.getElementById('r-co').textContent = esc(ent.name || '');
+      document.getElementById('r-thesis').textContent = '“' + esc(b.thesis || '') + '”';
+      const vp = document.getElementById('r-verdict');
+      vp.className = 'vpill'; vp.textContent = '— Not in knowledge base';
+      document.getElementById('r-lean').textContent = '';
+      document.getElementById('r-conf').textContent = '—'; document.getElementById('r-confbar').style.width = '0%';
+      document.getElementById('r-dc').textContent = '—'; document.getElementById('r-dcbar').style.width = '0%';
+      document.getElementById('r-cracks').innerHTML =
+        '<div class="resolve" style="border-left:3px solid var(--accent);font-size:15px;padding:16px 18px;">'
+        + '<b>' + esc(nm) + ' isn’t in the knowledge base yet.</b><br>'
+        + esc(b.message || 'Add its filing to analyse it.') + '</div>';
+      renderDomains([]); renderReview(b.review);
+      return;
+    }
     document.getElementById('r-ticker').textContent = esc((b.entity && b.entity.ticker) || b.ticker || '—');
     // Company/date line from the brief, not hardcoded chrome: entity.name + the run timestamp.
     const ent = b.entity || {}, run = b.run || {};
@@ -393,7 +411,8 @@
     if(live){
       try{
         const brief = await live;
-        if(!brief || !brief.thesis_robustness){ _status('The backend returned an empty or unexpected result — showing the illustrative sample instead.', true); }
+        // Off-corpus briefs intentionally have no thesis_robustness — render their notice, not the sample.
+        if(!brief || (!brief.thesis_robustness && brief.entity_in_corpus !== false)){ _status('The backend returned an empty or unexpected result — showing the illustrative sample instead.', true); }
         else { renderBrief(brief); _status('', false); }
       }catch(e){
         // Visible error state — never a silent failure or a blank screen (AC2).

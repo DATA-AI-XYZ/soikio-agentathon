@@ -95,10 +95,12 @@ def robustness(claims: list[dict], cmap: list[dict]) -> str:
 
 
 def confidence(cmap: list[dict], data_completeness: float, base: float = 0.7,
-               zero_evidence_load_bearing: bool = False) -> float:
+               zero_evidence_load_bearing: bool = False, robustness: str | None = None) -> float:
     """Confidence with the documented caps (docs/scoring.md §3), applied in order."""
     conf = base
     if data_completeness < 0.5:
+        conf = min(conf, 0.5)
+    if robustness == "Breaks":                    # a broken thesis can't also read high-confidence
         conf = min(conf, 0.5)
     if any(c["severity"] == "high" for c in cmap):
         conf = min(conf, 0.45)

@@ -40,6 +40,13 @@ def test_confidence_caps():
     assert cio.confidence([{"severity": "high"}], 1.0) == 0.45
     assert cio.confidence([], 1.0, zero_evidence_load_bearing=True) == 0.4
     assert cio.confidence([{"severity": "high"}], 0.4, zero_evidence_load_bearing=True) == 0.4  # most conservative
+    # Breaks cap: a broken thesis (even a medium-severity unsupported Breaks) never reads high-confidence.
+    assert cio.confidence([], 1.0, robustness="Breaks") == 0.5
+    assert cio.confidence([{"severity": "medium"}], 1.0, robustness="Breaks") == 0.5
+    assert cio.confidence([], 1.0, robustness="Holds") == 0.7                                   # non-Breaks unaffected
+    # evidence-gap Breaks (unsupported load-bearing, no citations) lands at ≤ 0.4
+    assert cio.confidence([{"severity": "medium"}], 1.0, robustness="Breaks",
+                          zero_evidence_load_bearing=True) == 0.4
 
 
 def test_determinism():

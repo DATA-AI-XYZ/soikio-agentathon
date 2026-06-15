@@ -74,6 +74,31 @@ def run_domain(
 
 
 def run_all(claims: list[dict], foundry_iq, ask_claude, prompts_dir: str = "prompts") -> list[dict]:
-    """Run all six domain specialists (parallelisable). Returns the domain_findings array."""
-    # NOTE: parallelise with asyncio/ThreadPool in production; sequential here for clarity.
-    return [run_domain(l, claims, foundry_iq, ask_claude, prompts_dir) for l in LENSES]
+    """Run all six domain specialists concurrently. Returns the domain_findings array in LENS order.
+
+    Each lens is independent (its own retrieval + one Claude call), so they run on a thread pool;
+    a per-lens failure is isolated to a `coverage:false` row rather than voiding the panel."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    # Warm the lazy singleton clients ONCE before the pool, so the six worker threads don't race to
+    # build the (not necessarily thread-safe) Anthropic / Foundry IQ clients on first use.
+    try:
+        if not foundry_iq._use_mock():
+            foundry_iq._get_client()
+    except Exception:
+        pass
+    try:
+        import llm
+        llm._get()
+    except Exception:
+        pass
+
+    def _one(lens: str) -> dict:
+        try:
+            return run_domain(lens, claims, foundry_iq, ask_claude, prompts_dir)
+        except Exception as e:                       # isolate: one lens failing is a data gap, not a crash
+            return {"lens": lens, "net_lean": "thin", "finding": f"domain error: {type(e).__name__}",
+                    "points": [], "coverage": False}
+
+    with ThreadPoolExecutor(max_workers=6) as ex:
+        return list(ex.map(_one, LENSES))            # ex.map preserves LENSES order

@@ -40,9 +40,12 @@ Ties resolve to the **more conservative** rating (Breaks > Contested > Holds). T
 confidence = base
 base = mean(citation_strength of surviving evidence)         # 0–1
 cap if data_completeness < 0.5         → confidence ≤ 0.5
+cap if thesis_robustness == "Breaks"   → confidence ≤ 0.5
 cap if any unresolved high-severity    → confidence ≤ 0.45
 cap if load-bearing claim has 0 evidence either way → confidence ≤ 0.4
 ```
+
+A `Breaks` verdict can fire from a load-bearing claim being `unsupported` (a **medium**-severity crack), which would otherwise skip the high-severity cap — so the headline could read "Breaks" at base confidence. The Breaks cap closes that gap: a broken thesis is never reported at high confidence. An evidence-gap Breaks (unsupported load-bearing, no citations) lands at ≤ 0.4; a cited Breaks at ≤ 0.45–0.5.
 `data_completeness = lenses_with_usable_evidence / active_lens_count` where `active_lens_count` is the number of lenses actually run for this thesis (**3** for the MVP lens set — fundamental, risk, valuation — or **6** for the full set). A lens is "usable" only if the coverage probe found ≥1 relevant document for it. The denominator is the active lens set, not a hardcoded 6, so a 3-lens MVP run is not penalised for the 3 lenses it never ran.
 
 ## 4. Conflict-map dedup & ranking — deterministic
