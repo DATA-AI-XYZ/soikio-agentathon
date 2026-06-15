@@ -14,10 +14,11 @@ OR `FOUNDRY_IQ_BACKEND=mock` is set — a keyword pass over the HTML filings in 
 zero Azure calls. Lets the agents/report be built, tested, and demoed without live retrieval.
 """
 from __future__ import annotations
-import os, json, glob, re
+import os, json, glob, re, hashlib
 from pydantic import BaseModel, ConfigDict, Field
 
-__all__ = ["query", "coverage", "Citation", "Extract", "QueryResult"]
+__all__ = ["query", "coverage", "Citation", "Extract", "QueryResult",
+           "is_fresh", "current_corpus_version"]
 
 
 # --- citation contract (STORY-01.3.01 / ADR-0015) ---------------------------------------
@@ -39,6 +40,7 @@ class QueryResult(BaseModel):
     extracts: list[Extract] = Field(default_factory=list)
     citations: list[Citation] = Field(default_factory=list)
     activity: list = Field(default_factory=list)
+    corpus_version: str = ""  # ADR-0022 freshness stamp: recalled evidence carrying a stale version is never served as fresh
 
 
 def _load_env(path: str = ".env") -> None:
@@ -77,9 +79,57 @@ def _get_client():
     return _client
 
 
+# --- freshness rule (ADR-0022 / STORY-07.1.01) ------------------------------------------
+# TTL backstop for recalled/cached evidence; configurable, forced > 0 so fresh results are
+# never over-rejected. The rule lives in code with no external cache dependency.
+DEFAULT_TTL_S = max(1, int(os.environ.get("FOUNDRY_IQ_TTL_S", "3600")))
+
+
+def current_corpus_version() -> str:
+    """A stable signal for the *current* corpus generation (ADR-0022).
+
+    The version changes when the underlying corpus is re-indexed, so any cached/recalled entry
+    stamped with an older version is invalidated. Std-lib only; no external cache dependency.
+
+    - mock backend: a hash over knowledge/*.htm (name + size + mtime) — changes on re-index.
+    - live backend: the knowledge-base identity is the backstop signal; absent a finer Foundry IQ
+      version the versions match and the TTL is the freshness backstop (per ADR-0022).
+    """
+    if _use_mock():
+        sig = []
+        for path in sorted(glob.glob("knowledge/*.htm")):
+            try:
+                st = os.stat(path)
+                sig.append(f"{os.path.basename(path)}:{st.st_size}:{st.st_mtime_ns}")
+            except OSError:
+                sig.append(os.path.basename(path))
+        return "mock-" + hashlib.sha1("|".join(sig).encode("utf-8")).hexdigest()[:8]
+    # TODO(STORY-07.2.x): swap for the Foundry IQ index-generation id once exposed. Until then the
+    # live version is constant, so the TTL (not version-mismatch) is the freshness backstop (ADR-0022).
+    return f"kb-{KB_NAME}"
+
+
+def is_fresh(entry_version: str, current_version: str, age_s: float, ttl_s: float = DEFAULT_TTL_S) -> bool:
+    """Pure freshness predicate (ADR-0022): True ONLY when the entry's corpus_version matches the
+    current corpus_version AND its age is within the TTL.
+
+    A version mismatch (corpus re-indexed) OR an age at/over the TTL → False, so recalled/cached
+    evidence is never served as fresh. No external cache dependency — the rule lives in code.
+    The TTL boundary is exclusive (age == ttl_s is expired); a non-positive age or TTL is never
+    fresh, the conservative default.
+    """
+    if entry_version != current_version:
+        return False
+    return 0 <= age_s < ttl_s
+
+
 def _validated(extracts: list, citations: list, activity: list) -> dict:
-    """Build + validate the result against the contract, returning a plain dict (back-compat)."""
-    return QueryResult(extracts=extracts, citations=citations, activity=activity).model_dump()
+    """Build + validate the result against the contract, returning a plain dict (back-compat).
+
+    Stamps the current corpus_version (ADR-0022) onto the result so any later recall/cache of this
+    evidence can be freshness-checked via `is_fresh`."""
+    return QueryResult(extracts=extracts, citations=citations, activity=activity,
+                       corpus_version=current_corpus_version()).model_dump()
 
 
 def _to_citation(raw: dict) -> dict:

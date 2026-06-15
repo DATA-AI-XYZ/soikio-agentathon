@@ -6,7 +6,17 @@ as degraded (never silently dropped) so one slow/broken agent can't stall or voi
 """
 from __future__ import annotations
 import time, uuid, datetime, copy
-import extract, agents, cio, citations, lenses, llm, memory
+import extract, agents, cio, citations, lenses, llm, memory, foundry_iq
+
+
+def _corpus_version() -> str:
+    """Stamp the brief with the current corpus generation (ADR-0022 / STORY-07.1.01) so recalled
+    evidence can never be presented as fresh after a re-index. Best-effort: a signal failure must
+    never break /analyze."""
+    try:
+        return foundry_iq.current_corpus_version()
+    except Exception:
+        return ""
 
 
 def _safe_stance(name, thesis, extracted, sources, sids, degraded, extra=""):
@@ -61,6 +71,7 @@ def run(thesis: str) -> dict:
         "id": uuid.uuid4().hex[:12],
         "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "model": getattr(llm, "MODEL", "claude"),
+        "corpus_version": _corpus_version(),  # ADR-0022: freshness stamp — recall is fresh only if this matches current
         "total_s": tel["total_s"],
         "retrievals": len(sources),
         "lenses_with_evidence": lenses_with_evidence,
