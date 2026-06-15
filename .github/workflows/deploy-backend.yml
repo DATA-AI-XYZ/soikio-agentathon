@@ -53,8 +53,14 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Build image in ACR
-        run: az acr build -r "$ACR" -t "$IMAGE:${{ github.sha }}" -t "$IMAGE:latest" .
+      - name: Build and push image
+        # Runner-side docker build + push (not `az acr build`), so the deploy
+        # identity needs only AcrPush — no Contributor/scheduleRun on the registry.
+        run: |
+          az acr login -n "$ACR"
+          docker build -t "$ACR.azurecr.io/$IMAGE:${{ github.sha }}" -t "$ACR.azurecr.io/$IMAGE:latest" .
+          docker push "$ACR.azurecr.io/$IMAGE:${{ github.sha }}"
+          docker push "$ACR.azurecr.io/$IMAGE:latest"
 
       - name: Roll new Container App revision
         run: |
