@@ -157,6 +157,8 @@
       <div class="eyebrow">Run sk-20260612-1432</div>
       <h2 class="disp">Red-teaming the thesis…</h2>
       <p style="color:var(--t3);font-size:13px;margin-bottom:24px;">Grounding every claim in the public record via Foundry IQ.</p>
+      <!-- STORY-08.3.01 · live loading / empty / error states (no silent failure) -->
+      <div id="r-status" class="hint" style="margin-bottom:20px;display:none;"></div>
       <div class="runrow"><span class="dot ok" id="d-ex"></span><span class="nm">Extract claims</span><span class="meta" id="m-ex">3 claims · done</span></div>
       <div class="runrow"><span class="dot" id="d-bull"></span><span class="nm">Bull</span><span class="meta" id="m-bull">queued</span></div>
       <div class="runrow"><span class="dot" id="d-bear"></span><span class="nm">Bear</span><span class="meta" id="m-bear">queued</span></div>
@@ -170,15 +172,15 @@
     <div class="rhead">
       <div>
         <div class="eyebrow">Cited conflict map</div>
-        <div class="tk disp">MSFT</div>
+        <div class="tk disp" id="r-ticker">MSFT</div>
         <div class="co">Microsoft Corporation · NASDAQ · generated 12 Jun 2026</div>
-        <div class="thesisline">Thesis under test: <em>“Cloud-led margin expansion makes MSFT durably undervalued.”</em></div>
+        <div class="thesisline">Thesis under test: <em id="r-thesis">“Cloud-led margin expansion makes MSFT durably undervalued.”</em></div>
       </div>
       <div class="vbox">
-        <div class="vpill contested">◑ Thesis: Contested</div>
-        <div class="lean">equity lean: Bullish (secondary)</div>
-        <div class="meter"><div class="l"><span>Confidence</span><span>0.62</span></div><div class="bar"><span class="c" style="width:62%"></span></div></div>
-        <div class="meter"><div class="l"><span>Data completeness</span><span>0.55</span></div><div class="bar"><span class="d" style="width:55%"></span></div></div>
+        <div class="vpill contested" id="r-verdict">◑ Thesis: Contested</div>
+        <div class="lean" id="r-lean">equity lean: Bullish (secondary)</div>
+        <div class="meter"><div class="l"><span>Confidence</span><span id="r-conf">0.62</span></div><div class="bar"><span class="c" id="r-confbar" style="width:62%"></span></div></div>
+        <div class="meter"><div class="l"><span>Data completeness</span><span id="r-dc">0.55</span></div><div class="bar"><span class="d" id="r-dcbar" style="width:55%"></span></div></div>
       </div>
     </div>
 
@@ -196,6 +198,7 @@
       <div class="sect">Where the thesis cracks</div>
       <div class="sectsub">Ranked by severity · ⚡ could break the thesis · click a crack to verify its source.</div>
 
+      <div id="r-cracks">
       <div class="crack">
         <div class="top"><span class="sev high">⚡ high</span><span class="ctype">vulnerable</span><span class="claim">“Cloud margins keep expanding” — holds now, but capex intensity threatens it.</span></div>
         <div class="cite"><button class="citebtn" onclick="tog(this)">◷ source</button><div class="citebody"><div class="q">“Capital expenditures rose materially to support AI infrastructure…”</div><div class="src">msft-10k-2025.pdf · Item 7, MD&amp;A, p.48</div></div></div>
@@ -210,6 +213,7 @@
         <div class="top"><span class="sev low">low</span><span class="ctype">unsupported</span><span class="claim">“Supply-chain position is a moat” — no document in the knowledge base addresses it.</span></div>
         <div class="resolve"><b>Would resolve with:</b> a competitive / consensus source for the supply-chain lens.</div>
       </div>
+      </div><!-- /#r-cracks -->
     </div>
 
     <!-- STORY-09.3.02 — domain-findings panel: six per-lens specialists (ADR-0016) -->
@@ -313,10 +317,61 @@
     });
   }
   function step(dot,meta,txt,cls){return new Promise(r=>setTimeout(()=>{var d=document.getElementById(dot);d.className='dot '+cls;document.getElementById(meta).textContent=txt;r();},650));}
+  // ===== STORY-08.3.01 · live backend seam =====
+  // Empty API_BASE = demo mode (renders the bundled illustrative sample). Set window.SOIKIO_API
+  // to the deployed Container App origin to POST a real /analyze. See web/README.md (CORS seam).
+  const API_BASE = (window.SOIKIO_API || '').replace(/\/+$/, '');
+  const VERDICT_CLS = { holds:'holds', contested:'contested', breaks:'breaks' };
+  const VERDICT_SYM = { holds:'● ', contested:'◑ ', breaks:'○ ' };
+  const SEV_CLS = { high:'high', medium:'med', low:'low' };
+  function _status(msg, on){ const s=document.getElementById('r-status'); s.style.display = on?'block':'none'; s.textContent = msg||''; }
+
+  // Render a live brief (docs/output-schema.md shape) into the report. esc() every field (no stored XSS).
+  function renderBrief(b){
+    b = b || {};
+    document.getElementById('r-ticker').textContent = esc((b.entity && b.entity.ticker) || b.ticker || '—');
+    document.getElementById('r-thesis').textContent = '“' + esc(b.thesis || '') + '”';
+    const rob = String(b.thesis_robustness || 'Contested'), rk = rob.toLowerCase();
+    const vp = document.getElementById('r-verdict');
+    vp.className = 'vpill ' + (VERDICT_CLS[rk] || 'contested');
+    vp.textContent = (VERDICT_SYM[rk] || '◑ ') + 'Thesis: ' + esc(rob);
+    document.getElementById('r-lean').textContent = 'equity lean: ' + esc(b.equity_lean || '—');
+    const conf = Number(b.confidence ?? 0), dc = Number(b.data_completeness ?? 0);
+    document.getElementById('r-conf').textContent = conf.toFixed(2);
+    document.getElementById('r-confbar').style.width = Math.round(conf*100) + '%';
+    document.getElementById('r-dc').textContent = dc.toFixed(2);
+    document.getElementById('r-dcbar').style.width = Math.round(dc*100) + '%';
+    const cracks = Array.isArray(b.conflict_map) ? b.conflict_map : ((b.conflict_map && b.conflict_map.cracks) || []);
+    const box = document.getElementById('r-cracks');
+    if(!cracks.length){
+      box.innerHTML = '<div class="resolve">No cracks returned — the thesis held across every covered lens, or a lens had no covering document (data gap, not an invented crack).</div>';
+    } else {
+      box.innerHTML = cracks.map(c=>{
+        const cit = (c.citations||[])[0];
+        const sev = SEV_CLS[String(c.severity||'low').toLowerCase()] || 'low';
+        const cite = cit ? `<div class="cite"><button class="citebtn" onclick="tog(this)">◷ source</button><div class="citebody"><div class="q">${esc(cit.quote||'')}</div><div class="src">${esc(cit.source_id||'')} · ${esc(cit.locator||'doc-level')}</div></div></div>` : '';
+        const res = c.what_would_resolve ? `<div class="resolve"><b>Would resolve with:</b> ${esc(c.what_would_resolve)}</div>` : '';
+        return `<div class="crack"><div class="top"><span class="sev ${sev}">${esc(c.severity||'low')}</span><span class="ctype">${esc(c.crack_type||'')}</span><span class="claim">${esc(c.claim_under_test||'')}</span></div>${cite}${res}</div>`;
+      }).join('');
+    }
+    renderDomains(b.domain_findings);
+    renderReview(b.review);
+  }
+
   async function runIt(){
     show('v-run');
+    _status('', false);
     ['d-bull','d-bear','d-cau','d-cio'].forEach(i=>document.getElementById(i).className='dot');
     ['m-bull','m-bear','m-cau','m-cio'].forEach(i=>document.getElementById(i).textContent='queued');
+    // Kick off the live POST /analyze (if a backend is configured) in parallel with the loading animation.
+    const ticker = (document.getElementById('ticker').value||'').trim();
+    const thesis = (document.getElementById('thesis').value||'').trim();
+    let live = null;
+    if(API_BASE){
+      _status('Loading — calling the live red-team backend at ' + esc(API_BASE) + '; a real analysis can take ~10s…', true);
+      live = fetch(API_BASE + '/analyze', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ thesis, ticker }) })
+        .then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+    }
     document.getElementById('d-bull').className='dot go';document.getElementById('m-bull').textContent='reasoning…';
     await step('d-bull','m-bull','done · 6 retrievals','ok');
     document.getElementById('d-bear').className='dot go';document.getElementById('m-bear').textContent='reasoning…';
@@ -324,8 +379,18 @@
     document.getElementById('d-cau').className='dot go';document.getElementById('m-cau').textContent='reasoning…';
     await step('d-cau','m-cau','done · data gap','warn');
     document.getElementById('d-cio').className='dot go';document.getElementById('m-cio').textContent='adjudicating…';
-    await step('d-cio','m-cio','verdict: Contested','ok');
-    setTimeout(()=>show('v-report'),500);
+    await step('d-cio','m-cio','verdict: adjudicating','ok');
+    if(live){
+      try{
+        const brief = await live;
+        if(!brief || !brief.thesis_robustness){ _status('The backend returned an empty or unexpected result — showing the illustrative sample instead.', true); }
+        else { renderBrief(brief); _status('', false); }
+      }catch(e){
+        // Visible error state — never a silent failure or a blank screen (AC2).
+        _status('Error: couldn’t reach the live backend (' + esc(e.message) + '). Showing the illustrative sample below.', true);
+      }
+    }
+    setTimeout(()=>show('v-report'), 400);
   }
 </script>
 </body>
