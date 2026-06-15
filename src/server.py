@@ -9,12 +9,28 @@ from __future__ import annotations
 import os
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 import agent    # bare import — src/ is on sys.path (see Dockerfile --app-dir / PYTHONPATH)
 import memory   # run-history store (STORY-08.2.03)
 
 app = FastAPI(title="Soikio thesis red-team", version="1.0")
+
+# CORS (STORY-08.3.01): the published UI is served from the GitHub Pages origin while this API
+# lives on the Container App FQDN — so the browser `fetch POST /analyze` is a cross-origin request
+# and is blocked without an explicit allow-origin + OPTIONS preflight. Allow the Pages origin
+# (override via CORS_ALLOW_ORIGINS, comma-separated, e.g. to add http://localhost for dev).
+# Scoped to the allow-list — never "*".
+_cors_origins = [o.strip() for o in os.environ.get(
+    "CORS_ALLOW_ORIGINS", "https://data-ai-xyz.github.io"
+).split(",") if o.strip()]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_cors_origins,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type"],
+)
 
 # App Insights via OpenTelemetry (STORY-06.3.02 AC-2): when the connection string is
 # present, emit request traces + latency. No-op locally (var unset) so dev/tests are unaffected.
